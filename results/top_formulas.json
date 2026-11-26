@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-26T20:58:28+00:00",
+  "generated_at_utc": "2026-11-26T21:16:13+00:00",
   "engine": "CHAOS-Reverse-Miner/reverse_miner-v2.0",
   "scoring": {
     "score": "catch_rate_pct - 15.0 * false_alarms_per_1000",
@@ -112,7 +112,7 @@
       2.5
     ],
     "formulas_evaluated": 4572,
-    "formulas_qualified": 101
+    "formulas_qualified": 52
   },
   "data_fingerprint": {
     "UNRATE": {
@@ -260,6 +260,36 @@
       "series": "PAYEMS",
       "date": "2020-02-01",
       "direction": -1
+    },
+    {
+      "name": "GULF_WAR_OIL_1990",
+      "series": "WCOILBRENTEU",
+      "date": "1990-08-02",
+      "direction": 1
+    },
+    {
+      "name": "RECESSION_ICSA_1973",
+      "series": "ICSA",
+      "date": "1973-11-01",
+      "direction": 1
+    },
+    {
+      "name": "RECESSION_ICSA_1980",
+      "series": "ICSA",
+      "date": "1980-01-01",
+      "direction": 1
+    },
+    {
+      "name": "RECESSION_ICSA_1990",
+      "series": "ICSA",
+      "date": "1990-07-01",
+      "direction": 1
+    },
+    {
+      "name": "DOTCOM_ICSA_2001",
+      "series": "ICSA",
+      "date": "2001-03-01",
+      "direction": 1
     }
   ],
   "formulas": [
@@ -287,18 +317,19 @@
         }
       },
       "metrics": {
-        "hits": 9,
-        "events_total": 20,
-        "catch_rate_pct": 45.0,
-        "false_alarms": 39,
-        "false_alarms_per_1000": 4.229,
-        "score": -18.428
+        "hits": 10,
+        "events_total": 25,
+        "catch_rate_pct": 40.0,
+        "false_alarms": 38,
+        "false_alarms_per_1000": 4.12,
+        "score": -21.802
       },
       "event_hits": [
         "NBER_1969_PEAK",
         "GFC_LEHMAN_2008",
         "NBER_2020_PEAK",
         "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
         "PAYEMS_PEAK_1980",
         "PAYEMS_PEAK_1981",
         "PAYEMS_PEAK_1990",
@@ -330,18 +361,19 @@
         }
       },
       "metrics": {
-        "hits": 9,
-        "events_total": 20,
-        "catch_rate_pct": 45.0,
-        "false_alarms": 40,
-        "false_alarms_per_1000": 4.337,
-        "score": -20.055
+        "hits": 10,
+        "events_total": 25,
+        "catch_rate_pct": 40.0,
+        "false_alarms": 39,
+        "false_alarms_per_1000": 4.229,
+        "score": -23.428
       },
       "event_hits": [
         "NBER_1969_PEAK",
         "GFC_LEHMAN_2008",
         "NBER_2020_PEAK",
         "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
         "PAYEMS_PEAK_1980",
         "PAYEMS_PEAK_1981",
         "PAYEMS_PEAK_1990",
@@ -373,18 +405,19 @@
         }
       },
       "metrics": {
-        "hits": 9,
-        "events_total": 20,
-        "catch_rate_pct": 45.0,
-        "false_alarms": 40,
-        "false_alarms_per_1000": 4.337,
-        "score": -20.055
+        "hits": 10,
+        "events_total": 25,
+        "catch_rate_pct": 40.0,
+        "false_alarms": 39,
+        "false_alarms_per_1000": 4.229,
+        "score": -23.428
       },
       "event_hits": [
         "NBER_1969_PEAK",
         "GFC_LEHMAN_2008",
         "NBER_2020_PEAK",
         "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
         "PAYEMS_PEAK_1980",
         "PAYEMS_PEAK_1981",
         "PAYEMS_PEAK_1990",
@@ -396,61 +429,19 @@
       "rank": 4,
       "name": "F4",
       "combination": "OR_GATE",
-      "formula": "OR_GATE(window=medium, lead=long, huber_thr=8.0, cusum_thr=20.0, cusum_slack=0.25)",
+      "formula": "OR_GATE(window=slow, lead=medium, huber_thr=4.0, cusum_thr=10.0, cusum_slack=0.5)",
       "parameters": {
         "combination": "OR_GATE",
-        "window_policy": "medium",
-        "lead_policy": "long",
-        "huber_thr": 8.0,
-        "cusum_thr": 20.0,
-        "cusum_slack": 0.25,
-        "vol_thr": null,
-        "accel_thr": null,
-        "windows": {
-          "monthly": 24,
-          "weekly": 44
-        },
-        "lead_steps": {
-          "monthly": 12,
-          "weekly": 24
-        }
-      },
-      "metrics": {
-        "hits": 8,
-        "events_total": 20,
-        "catch_rate_pct": 40.0,
-        "false_alarms": 47,
-        "false_alarms_per_1000": 5.096,
-        "score": -36.439
-      },
-      "event_hits": [
-        "NBER_1969_PEAK",
-        "NBER_1973_PEAK",
-        "NBER_1980_PEAK",
-        "NBER_1981_PEAK",
-        "NBER_2020_PEAK",
-        "COVID_ICSA_2020",
-        "PAYEMS_PEAK_1981",
-        "PAYEMS_PEAK_2020"
-      ]
-    },
-    {
-      "rank": 5,
-      "name": "F5",
-      "combination": "OR_GATE",
-      "formula": "OR_GATE(window=medium, lead=medium, huber_thr=6.0, cusum_thr=20.0, cusum_slack=0.25)",
-      "parameters": {
-        "combination": "OR_GATE",
-        "window_policy": "medium",
+        "window_policy": "slow",
         "lead_policy": "medium",
-        "huber_thr": 6.0,
-        "cusum_thr": 20.0,
-        "cusum_slack": 0.25,
+        "huber_thr": 4.0,
+        "cusum_thr": 10.0,
+        "cusum_slack": 0.5,
         "vol_thr": null,
         "accel_thr": null,
         "windows": {
-          "monthly": 24,
-          "weekly": 44
+          "monthly": 36,
+          "weekly": 52
         },
         "lead_steps": {
           "monthly": 6,
@@ -458,121 +449,36 @@
         }
       },
       "metrics": {
-        "hits": 9,
-        "events_total": 20,
-        "catch_rate_pct": 45.0,
-        "false_alarms": 51,
-        "false_alarms_per_1000": 5.53,
-        "score": -37.945
+        "hits": 10,
+        "events_total": 25,
+        "catch_rate_pct": 40.0,
+        "false_alarms": 57,
+        "false_alarms_per_1000": 6.18,
+        "score": -52.703
       },
       "event_hits": [
         "NBER_1969_PEAK",
-        "NBER_1973_PEAK",
-        "NBER_1980_PEAK",
-        "NBER_1981_PEAK",
+        "GFC_LEHMAN_2008",
         "NBER_2020_PEAK",
         "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
+        "PAYEMS_PEAK_1980",
+        "PAYEMS_PEAK_1981",
         "PAYEMS_PEAK_1990",
         "PAYEMS_PEAK_2001",
         "PAYEMS_PEAK_2020"
       ]
     },
     {
-      "rank": 6,
-      "name": "F6",
+      "rank": 5,
+      "name": "F5",
       "combination": "OR_GATE",
-      "formula": "OR_GATE(window=medium, lead=long, huber_thr=6.0, cusum_thr=20.0, cusum_slack=0.25)",
-      "parameters": {
-        "combination": "OR_GATE",
-        "window_policy": "medium",
-        "lead_policy": "long",
-        "huber_thr": 6.0,
-        "cusum_thr": 20.0,
-        "cusum_slack": 0.25,
-        "vol_thr": null,
-        "accel_thr": null,
-        "windows": {
-          "monthly": 24,
-          "weekly": 44
-        },
-        "lead_steps": {
-          "monthly": 12,
-          "weekly": 24
-        }
-      },
-      "metrics": {
-        "hits": 9,
-        "events_total": 20,
-        "catch_rate_pct": 45.0,
-        "false_alarms": 52,
-        "false_alarms_per_1000": 5.638,
-        "score": -39.571
-      },
-      "event_hits": [
-        "NBER_1969_PEAK",
-        "NBER_1973_PEAK",
-        "NBER_1980_PEAK",
-        "NBER_1981_PEAK",
-        "NBER_2020_PEAK",
-        "COVID_ICSA_2020",
-        "PAYEMS_PEAK_1990",
-        "PAYEMS_PEAK_2001",
-        "PAYEMS_PEAK_2020"
-      ]
-    },
-    {
-      "rank": 7,
-      "name": "F7",
-      "combination": "OR_GATE",
-      "formula": "OR_GATE(window=medium, lead=short, huber_thr=6.0, cusum_thr=20.0, cusum_slack=0.25)",
-      "parameters": {
-        "combination": "OR_GATE",
-        "window_policy": "medium",
-        "lead_policy": "short",
-        "huber_thr": 6.0,
-        "cusum_thr": 20.0,
-        "cusum_slack": 0.25,
-        "vol_thr": null,
-        "accel_thr": null,
-        "windows": {
-          "monthly": 24,
-          "weekly": 44
-        },
-        "lead_steps": {
-          "monthly": 4,
-          "weekly": 6
-        }
-      },
-      "metrics": {
-        "hits": 9,
-        "events_total": 20,
-        "catch_rate_pct": 45.0,
-        "false_alarms": 53,
-        "false_alarms_per_1000": 5.747,
-        "score": -41.198
-      },
-      "event_hits": [
-        "NBER_1969_PEAK",
-        "NBER_1973_PEAK",
-        "NBER_1980_PEAK",
-        "NBER_1981_PEAK",
-        "NBER_2020_PEAK",
-        "COVID_ICSA_2020",
-        "PAYEMS_PEAK_1990",
-        "PAYEMS_PEAK_2001",
-        "PAYEMS_PEAK_2020"
-      ]
-    },
-    {
-      "rank": 8,
-      "name": "F8",
-      "combination": "OR_GATE",
-      "formula": "OR_GATE(window=slow, lead=long, huber_thr=6.0, cusum_thr=10.0, cusum_slack=0.5)",
+      "formula": "OR_GATE(window=slow, lead=long, huber_thr=4.0, cusum_thr=10.0, cusum_slack=0.5)",
       "parameters": {
         "combination": "OR_GATE",
         "window_policy": "slow",
         "lead_policy": "long",
-        "huber_thr": 6.0,
+        "huber_thr": 4.0,
         "cusum_thr": 10.0,
         "cusum_slack": 0.5,
         "vol_thr": null,
@@ -587,18 +493,20 @@
         }
       },
       "metrics": {
-        "hits": 8,
-        "events_total": 20,
+        "hits": 10,
+        "events_total": 25,
         "catch_rate_pct": 40.0,
-        "false_alarms": 52,
-        "false_alarms_per_1000": 5.638,
-        "score": -44.571
+        "false_alarms": 58,
+        "false_alarms_per_1000": 6.289,
+        "score": -54.329
       },
       "event_hits": [
         "NBER_1969_PEAK",
         "GFC_LEHMAN_2008",
         "NBER_2020_PEAK",
         "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
+        "PAYEMS_PEAK_1980",
         "PAYEMS_PEAK_1981",
         "PAYEMS_PEAK_1990",
         "PAYEMS_PEAK_2001",
@@ -606,8 +514,52 @@
       ]
     },
     {
-      "rank": 9,
-      "name": "F9",
+      "rank": 6,
+      "name": "F6",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=slow, lead=short, huber_thr=4.0, cusum_thr=10.0, cusum_slack=0.5)",
+      "parameters": {
+        "combination": "OR_GATE",
+        "window_policy": "slow",
+        "lead_policy": "short",
+        "huber_thr": 4.0,
+        "cusum_thr": 10.0,
+        "cusum_slack": 0.5,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 36,
+          "weekly": 52
+        },
+        "lead_steps": {
+          "monthly": 4,
+          "weekly": 6
+        }
+      },
+      "metrics": {
+        "hits": 10,
+        "events_total": 25,
+        "catch_rate_pct": 40.0,
+        "false_alarms": 58,
+        "false_alarms_per_1000": 6.289,
+        "score": -54.329
+      },
+      "event_hits": [
+        "NBER_1969_PEAK",
+        "GFC_LEHMAN_2008",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
+        "PAYEMS_PEAK_1980",
+        "PAYEMS_PEAK_1981",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
+      ]
+    },
+    {
+      "rank": 7,
+      "name": "F7",
       "combination": "OR_GATE",
       "formula": "OR_GATE(window=medium, lead=medium, huber_thr=4.0, cusum_thr=20.0, cusum_slack=0.25)",
       "parameters": {
@@ -629,12 +581,12 @@
         }
       },
       "metrics": {
-        "hits": 11,
-        "events_total": 20,
-        "catch_rate_pct": 55.0,
-        "false_alarms": 64,
-        "false_alarms_per_1000": 6.939,
-        "score": -49.088
+        "hits": 12,
+        "events_total": 25,
+        "catch_rate_pct": 48.0,
+        "false_alarms": 63,
+        "false_alarms_per_1000": 6.831,
+        "score": -54.461
       },
       "event_hits": [
         "NBER_1969_PEAK",
@@ -644,6 +596,7 @@
         "GFC_LEHMAN_2008",
         "NBER_2020_PEAK",
         "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
         "PAYEMS_PEAK_1980",
         "PAYEMS_PEAK_1990",
         "PAYEMS_PEAK_2001",
@@ -651,8 +604,8 @@
       ]
     },
     {
-      "rank": 10,
-      "name": "F10",
+      "rank": 8,
+      "name": "F8",
       "combination": "OR_GATE",
       "formula": "OR_GATE(window=medium, lead=long, huber_thr=4.0, cusum_thr=20.0, cusum_slack=0.25)",
       "parameters": {
@@ -674,12 +627,12 @@
         }
       },
       "metrics": {
-        "hits": 11,
-        "events_total": 20,
-        "catch_rate_pct": 55.0,
-        "false_alarms": 65,
-        "false_alarms_per_1000": 7.048,
-        "score": -50.714
+        "hits": 12,
+        "events_total": 25,
+        "catch_rate_pct": 48.0,
+        "false_alarms": 64,
+        "false_alarms_per_1000": 6.939,
+        "score": -56.088
       },
       "event_hits": [
         "NBER_1969_PEAK",
@@ -689,6 +642,95 @@
         "GFC_LEHMAN_2008",
         "NBER_2020_PEAK",
         "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
+        "PAYEMS_PEAK_1980",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
+      ]
+    },
+    {
+      "rank": 9,
+      "name": "F9",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=medium, lead=long, huber_thr=4.0, cusum_thr=10.0, cusum_slack=0.5)",
+      "parameters": {
+        "combination": "OR_GATE",
+        "window_policy": "medium",
+        "lead_policy": "long",
+        "huber_thr": 4.0,
+        "cusum_thr": 10.0,
+        "cusum_slack": 0.5,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 24,
+          "weekly": 44
+        },
+        "lead_steps": {
+          "monthly": 12,
+          "weekly": 24
+        }
+      },
+      "metrics": {
+        "hits": 10,
+        "events_total": 25,
+        "catch_rate_pct": 40.0,
+        "false_alarms": 60,
+        "false_alarms_per_1000": 6.505,
+        "score": -57.582
+      },
+      "event_hits": [
+        "NBER_1969_PEAK",
+        "NBER_1973_PEAK",
+        "GFC_LEHMAN_2008",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
+        "PAYEMS_PEAK_1980",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
+      ]
+    },
+    {
+      "rank": 10,
+      "name": "F10",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=medium, lead=medium, huber_thr=4.0, cusum_thr=10.0, cusum_slack=0.5)",
+      "parameters": {
+        "combination": "OR_GATE",
+        "window_policy": "medium",
+        "lead_policy": "medium",
+        "huber_thr": 4.0,
+        "cusum_thr": 10.0,
+        "cusum_slack": 0.5,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 24,
+          "weekly": 44
+        },
+        "lead_steps": {
+          "monthly": 6,
+          "weekly": 12
+        }
+      },
+      "metrics": {
+        "hits": 10,
+        "events_total": 25,
+        "catch_rate_pct": 40.0,
+        "false_alarms": 60,
+        "false_alarms_per_1000": 6.505,
+        "score": -57.582
+      },
+      "event_hits": [
+        "NBER_1969_PEAK",
+        "NBER_1973_PEAK",
+        "GFC_LEHMAN_2008",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "GULF_WAR_OIL_1990",
         "PAYEMS_PEAK_1980",
         "PAYEMS_PEAK_1990",
         "PAYEMS_PEAK_2001",

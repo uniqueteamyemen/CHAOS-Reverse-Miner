@@ -73,6 +73,20 @@ for _date in PAYEMS_PEAK_DATES:
     EVENTS.append((f"PAYEMS_PEAK_{_date[:4]}", "PAYEMS", _date, -1))
 
 
+#: Pre-2005 weekly anchors added in Cycle C4 so the weekly specialist can be
+#: trained cold instead of in-sample.  Dates come from the C4 directive; each
+#: one was cross-checked against the raw FRED prints (ICSA rises into the
+#: recession dates, Brent jumps 20.9 -> 26.4 in the week of 1990-08-02).
+WEEKLY_ANCHORS: list[tuple[str, str, str, int]] = [
+    ("GULF_WAR_OIL_1990", "WCOILBRENTEU", "1990-08-02", 1),
+    ("RECESSION_ICSA_1973", "ICSA", "1973-11-01", 1),
+    ("RECESSION_ICSA_1980", "ICSA", "1980-01-01", 1),
+    ("RECESSION_ICSA_1990", "ICSA", "1990-07-01", 1),
+    ("DOTCOM_ICSA_2001", "ICSA", "2001-03-01", 1),
+]
+EVENTS.extend(WEEKLY_ANCHORS)
+
+
 #: Per-series conditioning: v2.0 treats growing series as relative changes and
 #: keeps UNRATE (a rate that can hit zero) on plain first differences.
 SERIES_PROFILES: dict[str, dict[str, str]] = {

@@ -39,6 +39,9 @@ jobs:
       - name: Run composite router
         run: python -m core.composite_router
 
+      - name: Run C4 precursor miner
+        run: python -m core.c4_precursor_miner
+
       - name: Run blind holdout validator
         run: python -m stress_test.blind_validator
 

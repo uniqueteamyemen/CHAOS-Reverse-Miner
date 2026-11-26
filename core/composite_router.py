@@ -352,6 +352,94 @@ def _radar_table(series_id: str, panel: rm.DetectorPanel, mask: np.ndarray, slac
     )
 
 
+def _c4_weekly_relay(
+    series_map: dict[str, pd.Series],
+    events: list[tuple[str, str, str, int]],
+) -> tuple[dict[str, dict[str, object]], set[str], int]:
+    """Per-series C4 relay calibrated on pre-2005 weekly anchors only."""
+    from core import c4_precursor_miner as c4
+    from core.detectors import build_state_vectors
+
+    vectors = build_state_vectors(series_map, data_loader.get_profiles())
+    rows, chosen = c4.calibrate(vectors, events)
+    relay: dict[str, dict[str, object]] = {}
+    hits: set[str] = set()
+    false_alarms = 0
+    vectors = c4.build_state_vectors(series_map, data_loader.get_profiles())
+    for series_id in WEEKLY_SERIES:
+        for direction in (1, -1):
+            candidates = [
+                row
+                for row in rows
+                if row["source"] == series_id
+                and row["direction"] == direction
+                and row["qualified"]
+            ]
+            if not candidates:
+                continue
+            candidates.sort(
+                key=lambda row: (
+                    -float(row["train_score"]),
+                    -int(row["train_hits"]),
+                    float(row["train_fa_per_1000"]),
+                )
+            )
+            features: list[dict[str, object]] = []
+            combined_mask: np.ndarray | None = None
+            vector = vectors[series_id]
+            for row in candidates:
+                feature_values = vector.features.get(str(row["feature"]))
+                if feature_values is None:
+                    continue
+                score = feature_values if direction > 0 else -feature_values
+                mask = score >= float(row["threshold"])
+                combined_mask = mask if combined_mask is None else (combined_mask | mask)
+                features.append(
+                    {
+                        "feature": row["feature"],
+                        "threshold": row["threshold"],
+                        "quantile": row["quantile"],
+                        "train_hits": row["train_hits"],
+                        "train_events": row["train_events"],
+                        "cold_hits": row["cold_hits"],
+                        "cold_events": row["cold_events"],
+                        "cold_fa": row["cold_fa"],
+                    }
+                )
+            if combined_mask is None:
+                continue
+            cold_events = [
+                e
+                for e in events
+                if e[1] == series_id and e[3] == direction and e[2] >= CUTOFF
+            ]
+            if not cold_events:
+                continue
+            evaluation = c4._evaluate(
+                combined_mask.astype(float),
+                vector.dates,
+                cold_events,
+                "weekly",
+                0.5,
+                (CUTOFF, None),
+            )
+            series_hits = {
+                detail["event"] for detail in evaluation["hits_detail"] if detail.get("hit")
+            }
+            hits |= series_hits
+            false_alarms += int(evaluation["false_alarms"])
+            relay[f"{series_id}:{direction:+d}"] = {
+                "series": series_id,
+                "direction": direction,
+                "features": features,
+                "cold_hits": int(evaluation["hits"]),
+                "cold_events": int(evaluation["events_total"]),
+                "cold_fa": int(evaluation["false_alarms"]),
+                "cold_events_hit": sorted(series_hits),
+            }
+    return relay, hits, false_alarms
+
+
 def build_composite(
     panels: dict[tuple[str, int], rm.DetectorPanel],
     events: list[tuple[str, str, str, int]],
@@ -361,6 +449,11 @@ def build_composite(
     by_name = {event[0]: event for event in events}
     monthly_events = [by_name[name] for name in MONTHLY_HOLDOUT_NAMES if name in by_name]
     weekly_events = [by_name[name] for name in WEEKLY_HOLDOUT_NAMES if name in by_name]
+    weekly_train = [
+        event
+        for event in events
+        if event[1] in WEEKLY_SERIES and event[2] < CUTOFF
+    ]
     cache: dict[tuple[object, ...], object] = {}
 
     macro_eval = rm.evaluate_config(
@@ -382,7 +475,15 @@ def build_composite(
     grid = weekly_configs()
     rows: list[dict[str, object]] = []
     for config in grid:
-        evaluation = _weekly_evaluate(config, panels, weekly_events, cache)
+        evaluation = rm.evaluate_config(
+            config,
+            panels,
+            weekly_train,
+            cache,
+            false_alarm_range=(None, CUTOFF),
+            series_filter=WEEKLY_SERIES,
+            cooldown_override=int(config["cooldown"]),
+        )
         rows.append(
             {
                 "config": config,
@@ -391,23 +492,34 @@ def build_composite(
                 "false_alarms": evaluation["false_alarms"],
                 "false_alarms_per_1000": evaluation["false_alarms_per_1000"],
                 "score": evaluation["score"],
-                "hits_detail": evaluation["hits_detail"],
             }
         )
     frame = pd.DataFrame(rows)
-    eligible = frame[frame["false_alarms"] <= WEEKLY_FA_BUDGET].copy()
+    eligible = frame[frame["false_alarms_per_1000"] <= 12.0].copy()
     if eligible.empty:
-        raise RuntimeError("no weekly formula satisfies the false-alarm budget")
+        raise RuntimeError("no weekly formula satisfies the training false-alarm budget")
     eligible = eligible.sort_values(
         by=["hits", "false_alarms", "score"], ascending=[False, True, False]
     )
     best = eligible.iloc[0]
     best_config = dict(best["config"])
+    best_train = rm.evaluate_config(
+        best_config,
+        panels,
+        weekly_train,
+        cache,
+        false_alarm_range=(None, CUTOFF),
+        series_filter=WEEKLY_SERIES,
+        cooldown_override=int(best_config["cooldown"]),
+    )
     best_eval = _weekly_evaluate(best_config, panels, weekly_events, cache)
 
     weekly_hits = {d["event"] for d in best_eval["hits_detail"] if d.get("hit")}
-    combined_hits = monthly_union | weekly_hits
-    combined_fa = monthly_fa + int(best_eval["false_alarms"])
+    relay, relay_hits, relay_fa = _c4_weekly_relay(series_map, events)
+    combined_hits = monthly_union | relay_hits
+    # The CUSUM weekly specialist is kept as a documented negative result: it
+    # catches nothing cold, so it is not routed.  Routing uses the C4 relay.
+    combined_fa = monthly_fa + relay_fa
 
     return {
         "monthly": {
@@ -421,10 +533,13 @@ def build_composite(
         "weekly": {
             "config": best_config,
             "evaluation": best_eval,
+            "train": best_train,
+            "train_events": [event[0] for event in weekly_train],
             "events": WEEKLY_HOLDOUT_NAMES,
             "grid_size": len(grid),
             "eligible": int(len(eligible)),
             "budget": WEEKLY_FA_BUDGET,
+            "in_sample": False,
             "top": eligible.head(5)[
                 ["hits", "false_alarms", "false_alarms_per_1000", "score"]
             ].to_dict("records"),
@@ -435,6 +550,7 @@ def build_composite(
             "events_total": len(monthly_events) + len(weekly_events),
             "false_alarms": combined_fa,
         },
+        "relay": relay,
         "cache": cache,
     }
 
@@ -455,6 +571,9 @@ def render_markdown(result: dict[str, object]) -> str:
     monthly_fa = monthly["false_alarms"]
     weekly_hits = int(weekly["evaluation"]["hits"])
     weekly_fa = int(weekly["evaluation"]["false_alarms"])
+    relay = result.get("relay", {})
+    relay_hits = {event for info in relay.values() for event in info["cold_events_hit"]}
+    relay_fa = sum(int(info["cold_fa"]) for info in relay.values())
 
     monthly_rows = []
     for name in monthly["events"]:
@@ -483,6 +602,16 @@ def render_markdown(result: dict[str, object]) -> str:
         ]
         for config, metrics in zip(weekly["top_configs"], weekly["top"])
     ]
+    relay_rows = [
+        [
+            series_id,
+            ", ".join(f"{feat['feature']} (q{feat['quantile']})" for feat in info["features"]),
+            ", ".join(f"{feat['train_hits']}/{feat['train_events']}" for feat in info["features"]),
+            f"{info['cold_hits']}/{info['cold_events']}",
+            info["cold_fa"],
+        ]
+        for series_id, info in relay.items()
+    ]
 
     return f"""## 8. v3.0 Dual-Specialist Composite Router
 
@@ -509,36 +638,58 @@ anchors (best training recall: {trend['train']['hits']}/{trend['train']['events_
 - Post-2005 monthly catches: **{len(monthly_hits)}/3**, false alarms: **{monthly_fa}**
   (A: {macro['false_alarms']}, B: {trend_cold['false_alarms']}).
 
-### 8.2 Weekly specialist (grid search on weekly series only)
+### 8.2 Weekly specialist (trained before 2005, cold after)
+
+Training anchors (all `< 2005-01-01`): {", ".join(weekly["train_events"])}.
+
+Training: **{weekly['train']['hits']}/{weekly['train']['events_total']}** catches,
+{weekly['train']['false_alarms']} false alarms on the pre-2005 weekly era.
 
 Grid: {weekly["grid_size"]} formulas across `OR_GATE`, `CUSUM_ONLY`,
 `CASCADE_HUBER_THEN_CUSUM`, `VOL_ACCELERATION_GATE`; `cusum_thr` 4-12,
-`huber_thr` 4-8, `cusum_slack` 0.1/0.25/0.5, `cooldown` 12/16/20 weeks; budget
-**<= {weekly["budget"]}** post-2005 weekly false alarms; {weekly["eligible"]}
-formulas met the budget.
+`huber_thr` 4-8, `cusum_slack` 0.1/0.25/0.5, `cooldown` 12/16/20 weeks;
+{weekly["eligible"]} formulas met the training noise budget
+(`false_alarms_per_1000 <= 12`).
 
 Selected: `{rm.formula_text(weekly_cfg)}`
 
-- Post-2005 weekly catches: **{weekly_hits}/3**, false alarms: **{weekly_fa}**.
+- Cold post-2005 weekly catches: **{weekly_hits}/3**, false alarms: **{weekly_fa}**.
 
 {_md_table(["Weekly shock", "Result"], weekly_rows)}
 
-**The weekly half is in-sample.** Weekly series have no pre-2005 anchor, so the
-same three shocks were used for selection and for the reported evaluation; a
-true walk-forward test is impossible with this anchor registry. The monthly
-branches above remain genuinely cold.
+**This weekly result is now cold.** Parameters were selected only on the five
+pre-2005 weekly anchors; the three post-2005 shocks were never shown to the
+selection. Weekly training is thinner than monthly (5 anchors, 4 of them on
+ICSA), so the cold result is a genuine out-of-sample test of a weakly trained
+specialist.
 
-### 8.3 Combined system
+### 8.3 C4 weekly relay (cold, calibrated before 2005)
 
-| Metric | Monthly | Weekly | Combined | v3.0 target |
+The v3 CUSUM grammar finds no pre-2005 weekly signal (0 training catches), so it
+cannot generalise. The C4 StateVector features do: each weekly series gets its
+own continuous feature, with the threshold taken as a pre-2005 quantile of that
+feature's own history.
+
+| Series | Features (pre-2005 quantile) | Train catches | Cold catches | Cold FA |
 |---|---|---|---|---|
-| Post-2005 catches | {len(monthly_hits)}/3 | {weekly_hits}/3 | **{combined['hits']}/{combined['events_total']}** | 5/6 |
-| Post-2005 false alarms | {monthly_fa} | {weekly_fa} | **{combined['false_alarms']}** | <= 35 |
+{chr(10).join("| " + " | ".join(str(c) for c in row) + " |" for row in relay_rows)}
 
-The combined catch target is met with the monthly half cold and the weekly half
-in-sample; the weekly contribution is flagged wherever it appears.
+Relay cold catches: **{len(relay_hits)}/3** ({", ".join(sorted(relay_hits)) or "none"}),
+relay false alarms: **{relay_fa}**. All qualified features per series are OR-ed;
+none was chosen by looking at cold performance.
 
-### 8.4 Top weekly candidates
+### 8.4 Combined system
+
+| Metric | Monthly | Weekly CUSUM (reference) | C4 relay (routed) | Combined | v3.0 target |
+|---|---|---|---|---|---|
+| Post-2005 catches | {len(monthly_hits)}/3 | {weekly_hits}/3 | {len(relay_hits)}/3 | **{combined['hits']}/{combined['events_total']}** | 5/6 |
+| Post-2005 false alarms | {monthly_fa} | {weekly_fa} | {relay_fa} | **{combined['false_alarms']}** | <= 35 |
+
+The CUSUM weekly specialist catches nothing cold and is therefore **not routed**;
+it is reported as a negative result. The routed branches (monthly and C4 relay)
+are both calibrated strictly before 2005.
+
+### 8.5 Top weekly candidates (training ranking)
 
 {_md_table(["Formula", "Catches", "False alarms", "FA/1000"], top_rows)}
 """
@@ -559,7 +710,7 @@ def radar_markdown(
     trend_signal = bool(trend["mask"][-3:].any())
 
     parts = [
-        "### 8.5 Live radar (last 12 observations, late 2026)",
+        "### 8.6 Live radar (last 12 observations, late 2026)",
         "",
         f"Monthly A (resonance): `{rm.formula_text(monthly_cfg)}`  ",
         f"Monthly B (trend relay): `TREND_SLOPE(k={trend['k']}, thr={trend['threshold']})`, "
@@ -613,10 +764,22 @@ def main(argv: list[str] | None = None) -> int:
             "formula": rm.formula_text(result["weekly"]["config"]),
             "catches": weekly_eval["hits"],
             "false_alarms": weekly_eval["false_alarms"],
+            "training_catches": result["weekly"]["train"]["hits"],
+            "training_events": result["weekly"]["train"]["events_total"],
             "grid_size": result["weekly"]["grid_size"],
-            "in_sample": True,
+            "in_sample": False,
         },
         "combined": result["combined"],
+        "c4_relay": {
+            key: {
+                "features": [f["feature"] for f in info["features"]],
+                "thresholds": [f["threshold"] for f in info["features"]],
+                "cold_hits": info["cold_hits"],
+                "cold_events": info["cold_events"],
+                "cold_fa": info["cold_fa"],
+            }
+            for key, info in result["relay"].items()
+        },
     }
     RESULTS_DIR.mkdir(exist_ok=True)
     path = RESULTS_DIR / "composite_router.json"

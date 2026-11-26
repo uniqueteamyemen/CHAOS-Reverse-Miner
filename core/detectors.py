@@ -269,3 +269,167 @@ def build_panels(
                 str(profile["transform"]),
             )
     return panels
+
+
+# --------------------------------------------------------------------------- #
+# C4 StateVector: continuous features, no hardcoded alarm thresholds
+# --------------------------------------------------------------------------- #
+@dataclass
+class StateVector:
+    series_id: str
+    frequency: str
+    dates: np.ndarray
+    features: dict[str, np.ndarray]
+    meta: dict[str, object]
+
+
+PH_ALPHA = 0.1
+
+
+def _rolling_slope(values: np.ndarray, window: int) -> np.ndarray:
+    n = values.size
+    out = np.full(n, np.nan)
+    if n < window or window < 2:
+        return out
+    x = np.arange(window, dtype=float)
+    xc = x - x.mean()
+    denominator = float(np.dot(xc, xc))
+    for i in range(window - 1, n):
+        chunk = values[i - window + 1 : i + 1]
+        if not np.all(np.isfinite(chunk)):
+            continue
+        out[i] = float(np.dot(xc, chunk) / denominator)
+    return out
+
+
+def sahm_floor_displacement(series: pd.Series, frequency: str) -> np.ndarray:
+    """MA3 above its 12m floor (monthly) or MA4 / 52w floor - 1 (weekly)."""
+    levels = pd.Series(series.to_numpy(dtype=float))
+    if frequency == "monthly":
+        short = levels.rolling(3, min_periods=3).mean()
+        floor = short.rolling(12, min_periods=12).min()
+        return (short - floor).to_numpy()
+    short = levels.rolling(4, min_periods=4).mean()
+    floor = short.rolling(52, min_periods=52).min()
+    return (short / floor.replace(0.0, np.nan) - 1.0).to_numpy()
+
+
+def page_hinkley(values: np.ndarray, alpha: float = PH_ALPHA) -> tuple[np.ndarray, np.ndarray]:
+    """One-sided Page-Hinkley accumulators with EWMA mean and decay on reversion."""
+    n = values.size
+    up = np.zeros(n)
+    down = np.zeros(n)
+    mean = np.nan
+    for i, value in enumerate(values):
+        if not np.isfinite(value):
+            up[i] = up[i - 1] if i else 0.0
+            down[i] = down[i - 1] if i else 0.0
+            continue
+        mean = value if not np.isfinite(mean) else alpha * value + (1.0 - alpha) * mean
+        deviation = value - mean
+        previous_up = up[i - 1] if i else 0.0
+        previous_down = down[i - 1] if i else 0.0
+        up[i] = max(0.0, (1.0 - alpha) * previous_up + deviation)
+        down[i] = max(0.0, (1.0 - alpha) * previous_down - deviation)
+    return up, down
+
+
+def drawdown_features(series: pd.Series, frequency: str) -> tuple[np.ndarray, np.ndarray]:
+    levels = series.to_numpy(dtype=float)
+    window = 12 if frequency == "monthly" else 52
+    frame = pd.Series(levels)
+    peak = frame.rolling(window, min_periods=window).max()
+    drawdown = (frame - peak) / peak.replace(0.0, np.nan)
+    ratio = frame / frame.shift(1)
+    log_return = np.log(ratio.where(ratio > 0))
+    volatility = log_return.rolling(window, min_periods=window).std(ddof=1)
+    normalised = drawdown / volatility.replace(0.0, np.nan)
+    return drawdown.to_numpy(), normalised.to_numpy()
+
+
+def l1_slope_break(values: np.ndarray, frequency: str) -> np.ndarray:
+    """|slope_recent - slope_prior| / MAD(diff) over the trailing window."""
+    window = 24 if frequency == "monthly" else 44
+    half = max(3, window // 2)
+    recent = _rolling_slope(values, half)
+    prior = _rolling_slope(values, half)
+    shifted = np.full(values.size, np.nan)
+    shifted[half:] = prior[:-half]
+    magnitude = np.abs(recent - shifted)
+    differences = pd.Series(np.diff(values, prepend=np.nan))
+    median = differences.rolling(window, min_periods=window).median()
+    mad = (differences - median).abs().rolling(window, min_periods=window).median()
+    std = differences.rolling(window, min_periods=window).std(ddof=1)
+    return magnitude / robust_scale(mad.to_numpy(), std.to_numpy())
+
+
+def build_series_state(series: pd.Series, frequency: str, transform: str) -> StateVector:
+    dates, conditioned = transform_series(series.rename(series.name), transform)
+    sahm = sahm_floor_displacement(series, frequency)[1:]
+    drawdown, drawdown_norm = drawdown_features(series, frequency)
+    drawdown, drawdown_norm = drawdown[1:], drawdown_norm[1:]
+    ph_up, ph_down = page_hinkley(conditioned)
+    slope_break = l1_slope_break(conditioned, frequency)
+    trend = trend_slope_z(series, 6 if frequency == "monthly" else 12, 24)[1:]
+    return StateVector(
+        series_id=str(series.name),
+        frequency=frequency,
+        dates=dates,
+        features={
+            "sahm_floor_displacement": sahm,
+            "ph_up": ph_up,
+            "ph_down": ph_down,
+            "drawdown": drawdown,
+            "drawdown_norm": drawdown_norm,
+            "l1_slope_break": slope_break,
+            "trend_slope_z": trend,
+        },
+        meta={
+            "frequency": frequency,
+            "transform": transform,
+            "ph_alpha": PH_ALPHA,
+            "n": int(conditioned.size),
+            "start": str(pd.Timestamp(dates[0]).date()) if dates.size else None,
+            "end": str(pd.Timestamp(dates[-1]).date()) if dates.size else None,
+        },
+    )
+
+
+def build_fusion_state(icsa: pd.Series, payems: pd.Series) -> StateVector:
+    """Monthly ICSA 4-week surge aligned with a 3-month PAYEMS contraction."""
+    icsa_four = icsa.rolling(4, min_periods=4).mean()
+    baseline = icsa_four.rolling(52, min_periods=52).median()
+    surge = icsa_four / baseline.replace(0.0, np.nan) - 1.0
+    surge_month = surge.resample("ME").max()
+    pay_month = payems.resample("ME").last()
+    contraction = -np.log(pay_month / pay_month.shift(3))
+    joined = pd.concat(
+        [surge_month.rename("surge"), contraction.rename("contraction")], axis=1
+    ).dropna()
+    raw = joined["surge"] * joined["contraction"]
+    median = raw.rolling(36, min_periods=24).median()
+    mad = (raw - median).abs().rolling(36, min_periods=24).median()
+    std = raw.rolling(36, min_periods=24).std(ddof=1)
+    fusion = (raw - median) / robust_scale(mad.to_numpy(), std.to_numpy())
+    return StateVector(
+        series_id="FUSION",
+        frequency="monthly",
+        dates=joined.index.to_numpy(),
+        features={"icsa_payems_fusion": np.clip(fusion.to_numpy(), -Z_CAP, Z_CAP)},
+        meta={"components": ["ICSA_4w_surge", "-PAYEMS_3m_log_return"], "n": int(len(joined))},
+    )
+
+
+def build_state_vectors(
+    series_map: dict[str, pd.Series],
+    profiles: dict[str, dict[str, object]],
+) -> dict[str, StateVector]:
+    vectors: dict[str, StateVector] = {}
+    for series_id, series in series_map.items():
+        profile = profiles[series_id]
+        vectors[series_id] = build_series_state(
+            series.rename(series_id), str(profile["frequency"]), str(profile["transform"])
+        )
+    if "ICSA" in series_map and "PAYEMS" in series_map:
+        vectors["FUSION"] = build_fusion_state(series_map["ICSA"], series_map["PAYEMS"])
+    return vectors

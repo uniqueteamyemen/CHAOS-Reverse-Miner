@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-26T20:58:30+00:00",
+  "generated_at_utc": "2026-11-26T21:20:29+00:00",
   "engine": "CHAOS-Reverse-Miner/composite_router-v3.0",
   "monthly_specialist": {
     "resonance_formula": "CROSS_SERIES_MACRO_GATE(window=fast, lead=long, huber_thr=4.0, cusum_thr=4.0, cusum_slack=0.5, resonance<=2mo)",
@@ -12,15 +12,45 @@
     "routed_false_alarms": 7
   },
   "weekly_specialist": {
-    "formula": "OR_GATE(window=medium, lead=short, huber_thr=4.0, cusum_thr=8.0, cusum_slack=0.25)",
-    "catches": 2,
-    "false_alarms": 26,
+    "formula": "CASCADE_HUBER_THEN_CUSUM(window=fast, lead=short, huber_thr=4.0, cusum_thr=4.0, cusum_slack=0.1)",
+    "catches": 0,
+    "false_alarms": 5,
+    "training_catches": 1,
+    "training_events": 5,
     "grid_size": 3078,
-    "in_sample": true
+    "in_sample": false
   },
   "combined": {
     "hits": 5,
     "events_total": 6,
-    "false_alarms": 33
+    "false_alarms": 35
+  },
+  "c4_relay": {
+    "WCOILBRENTEU:+1": {
+      "features": [
+        "ph_up",
+        "l1_slope_break",
+        "trend_slope_z"
+      ],
+      "thresholds": [
+        0.282109,
+        0.174103,
+        1.76103
+      ],
+      "cold_hits": 1,
+      "cold_events": 1,
+      "cold_fa": 20
+    },
+    "ICSA:+1": {
+      "features": [
+        "sahm_floor_displacement"
+      ],
+      "thresholds": [
+        0.358678
+      ],
+      "cold_hits": 1,
+      "cold_events": 1,
+      "cold_fa": 8
+    }
   }
 }
