@@ -36,6 +36,9 @@ jobs:
       - name: Run reverse miner
         run: python -m core.reverse_miner
 
+      - name: Run composite router
+        run: python -m core.composite_router
+
       - name: Run blind holdout validator
         run: python -m stress_test.blind_validator
 
