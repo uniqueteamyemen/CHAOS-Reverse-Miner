@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "pinned_at": "2026-11-27",
+  "monthly": {
+    "macro_gate": {
+      "combination": "CROSS_SERIES_MACRO_GATE",
+      "window": "fast",
+      "lead": "long",
+      "huber_thr": 4.0,
+      "cusum_thr": 4.0,
+      "cusum_slack": 0.5,
+      "resonance_months": 2,
+      "window_months": 18,
+      "lead_steps": 12
+    },
+    "trend_slope": {
+      "series": "UNRATE",
+      "k": 6,
+      "thr": 2.0,
+      "baseline": 24
+    }
+  },
+  "fusion": {
+    "feature": "icsa_payems_fusion",
+    "threshold": 2.672005,
+    "quantile": 0.95
+  },
+  "weekly_relay": {
+    "trailing_weeks": 4,
+    "ICSA": {
+      "feature": "sahm_floor_displacement",
+      "threshold": 0.358678,
+      "quantile": 0.9
+    },
+    "WCOILBRENTEU": {
+      "features": {
+        "ph_up": 0.282109,
+        "l1_slope_break": 0.174103,
+        "trend_slope_z": 1.76103
+      },
+      "quantiles": {
+        "ph_up": 0.995,
+        "l1_slope_break": 0.999,
+        "trend_slope_z": 0.95
+      },
+      "ph_down_unlatch": 0.05
+    }
+  },
+  "provenance": {
+    "macro_gate": "v2.0 noise-budgeted winner, frozen",
+    "trend_slope": "v3.0 trend relay, selected on pre-2005 UNRATE anchors",
+    "fusion_threshold": "results/c4_state_vector_summary.json (FUSION q0.95)",
+    "weekly_relay": "results/c4_state_vector_summary.json (pre-2005 quantiles)",
+    "ph_down_unlatch": "Page-Hinkley decay floor used to clear the Brent latch"
+  }
+}

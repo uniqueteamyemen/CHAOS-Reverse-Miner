@@ -1,0 +1,8 @@
+{
+  "period": "2023-01-01 to 2026-11-27",
+  "acceptable_alarms_max": 3,
+  "required_real_crisis_caught": true,
+  "false_alarm_budget_per_year": 1.0,
+  "alarm_logic": "ALARM = OR on {TREND_SLOPE, CROSS_SERIES}; WATCH = OR on {C4_relay, icsa_payems_fusion} without ALARM; QUIET = none",
+  "thresholds_source": "production/thresholds.json (SHA-256 pinned)"
+}

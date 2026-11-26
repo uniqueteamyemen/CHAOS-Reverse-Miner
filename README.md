@@ -44,6 +44,9 @@ CHAOS-Reverse-Miner/
 │   └── c4_precursor_miner.py   # windows, calibration, precedence, diagnostics
 ├── stress_test/
 │   └── blind_validator.py      # pre-2005 mining, cold test, radar
+├── production/
+│   ├── thresholds.json         # pinned thresholds (SHA-256 logged)
+│   └── chaos_engine.py         # 3-state deterministic engine + causal replay
 └── results/
     ├── reverse_mining_leaderboard.csv
     ├── top_formulas.json
@@ -51,7 +54,10 @@ CHAOS-Reverse-Miner/
     ├── composite_router.json
     ├── c4_precursor_report.md
     ├── c4_state_vector_summary.json
-    └── c4_pre_event_windows.csv
+    ├── c4_pre_event_windows.csv
+    ├── paper_trading_protocol.json
+    ├── paper_trading_2023_2026.md
+    └── live_engine_state.json
 ```
 
 ## 3. Data and anchors
@@ -150,7 +156,38 @@ detector, and it is reported rather than engineered around.
   therefore not re-firing on the stale June sell-off.
 - **UNRATE, PAYEMS, ICSA: quiet** over the last three observations.
 
-## 8. Reproduce locally
+## 8. Production engine (deterministic 3-state)
+
+`production/chaos_engine.py` runs a single causal replay and a live snapshot.
+Every threshold is read from `production/thresholds.json` (SHA-256 pinned in the
+output); nothing is hardcoded in Python.
+
+| State | Rule |
+|---|---|
+| `ALARM` | `TREND_SLOPE(UNRATE)` OR `CROSS_SERIES_MACRO_GATE` |
+| `WATCH` | `icsa_payems_fusion` OR C4 weekly relay, without ALARM |
+| `QUIET` | neither |
+
+The replay (`2023-01-01` → `2026-10`, 45 monthly decisions) rebuilds each feature
+from the prefix ending at the decision month: zero lookahead.
+
+| Metric | Result |
+|---|---|
+| ALARM episodes | **1** (protocol max 3) |
+| WATCH episodes | 3 |
+| False alarms per year | **0.267** (budget 1.0) |
+| Verdict | **PASS** |
+| Live state (2026-10) | **QUIET** |
+
+The single ALARM is one continuous 14-month episode starting at the replay
+boundary, driven by a latched PAYEMS downward CUSUM (peak 14.5, threshold 4)
+rather than a fresh 2023 signal; it is counted once and disclosed in
+`results/paper_trading_2023_2026.md`. The pre-committed protocol lives in
+`results/paper_trading_protocol.json`; the machine state in
+`results/live_engine_state.json`. Two consecutive runs produce byte-identical
+JSON (verified by SHA-256).
+
+## 9. Reproduce locally
 
 ```bash
 python -m venv .venv
@@ -161,16 +198,17 @@ python -m core.reverse_miner
 python -m core.composite_router
 python -m core.c4_precursor_miner
 python -m stress_test.blind_validator
+python -m production.chaos_engine
 ```
 
-## 9. CI
+## 10. CI
 
-`run_reverse_mining.yml` runs on push to `main` and on `workflow_dispatch`:
-checkout → Python 3.11 → install → miner → composite router → C4 miner →
-blind validator → artifact upload → commit changed `results/` back to `main`
-with `[skip ci]`.
+`run_reverse_mining.yml` runs on push to `main`, on `workflow_dispatch`, and on
+a daily schedule (`0 14 * * *`): checkout → Python 3.11 → install → miner →
+composite router → C4 miner → blind validator → production engine → artifact
+upload → commit changed `results/` back to `main` with `[skip ci]`.
 
-## 10. Limitations
+## 11. Limitations
 
 1. 25 anchors, 6 post-2005; a sanity check, not statistical proof.
 2. Weekly training is thin: 5 anchors, 4 of them ICSA. Brent has a single
@@ -182,7 +220,7 @@ with `[skip ci]`.
 5. No transaction costs, covariates or regime model: this is a detector-mining
    benchmark, not a trading system.
 
-## 11. Status
+## 12. Status
 
 | Item | State |
 |---|---|
@@ -194,3 +232,5 @@ with `[skip ci]`.
 | CI pipeline | verified green |
 | Combined 5/6 @ <=35 | met (5/6, 35) |
 | 2014 cold catch | not achieved - structural, documented |
+| Production engine (pinned thresholds, 3 states) | implemented, deterministic |
+| 2023-2026 paper-trading protocol | PASS (1 alarm, 0.267 FA/year) |

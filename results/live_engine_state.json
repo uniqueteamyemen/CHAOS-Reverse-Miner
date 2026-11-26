@@ -1,0 +1,205 @@
+{
+  "data_fingerprint": {
+    "ICSA": {
+      "end": "2026-11-21",
+      "rows": 3125,
+      "sha256": "0de31121f29da6baa5378877086cdc450447fdbd2d6186059f586bf79543f25b",
+      "start": "1967-01-07"
+    },
+    "PAYEMS": {
+      "end": "2026-10-01",
+      "rows": 1054,
+      "sha256": "968f9252d00246e2b6cf40307e01eef7a413ec936fcc45c7498347a509a2dc32",
+      "start": "1939-01-01"
+    },
+    "UNRATE": {
+      "end": "2026-10-01",
+      "rows": 945,
+      "sha256": "fb669461abc34e00324b940be6bad1c7f89117652f28587196a7b8bf4a9f56a1",
+      "start": "1948-01-01"
+    },
+    "WCOILBRENTEU": {
+      "end": "2026-09-04",
+      "rows": 2052,
+      "sha256": "72a5e568a787f6babe4d25b84c76be739cc0b12b6f0b8fad8c16be07a12fb3f9",
+      "start": "1987-05-15"
+    }
+  },
+  "deterministic": true,
+  "engine": "chaos_engine-v1.0.0",
+  "live_state": {
+    "decision_month": "2026-10",
+    "series": {
+      "ICSA": {
+        "as_of": "2026-11-21",
+        "fires": false,
+        "sahm_floor_displacement": 0.0038,
+        "threshold": 0.358678
+      },
+      "PAYEMS": {
+        "as_of": "2026-10-01",
+        "macro_resonance": false
+      },
+      "UNRATE": {
+        "as_of": "2026-10-01",
+        "macro_resonance": false,
+        "trend_slope_fires": false,
+        "trend_slope_z": -0.848
+      },
+      "WCOILBRENTEU": {
+        "as_of": "2026-09-04",
+        "features_firing": [],
+        "l1_slope_break": 0.0202,
+        "ph_down": 0.0,
+        "ph_down_unlatched": true,
+        "ph_up": 0.1977,
+        "thresholds": {
+          "l1_slope_break": 0.174103,
+          "ph_up": 0.282109,
+          "trend_slope_z": 1.76103
+        },
+        "trend_slope_z": 0.3564
+      }
+    },
+    "system_state": "QUIET",
+    "triggers": []
+  },
+  "protocol": {
+    "acceptable_alarms_max": 3,
+    "alarm_logic": "ALARM = OR on {TREND_SLOPE, CROSS_SERIES}; WATCH = OR on {C4_relay, icsa_payems_fusion} without ALARM; QUIET = none",
+    "false_alarm_budget_per_year": 1.0,
+    "period": "2023-01-01 to 2026-11-27",
+    "required_real_crisis_caught": true,
+    "thresholds_source": "production/thresholds.json (SHA-256 pinned)"
+  },
+  "replay": {
+    "acceptable_alarms_max": 3,
+    "alarm_count": 1,
+    "alarm_episodes": [
+      {
+        "end": "2024-02",
+        "months": 14,
+        "peak": {
+          "fusion_z": -0.01,
+          "macro_cusum_down": 14.502,
+          "trend_z": 0.648
+        },
+        "start": "2023-01",
+        "state": "ALARM",
+        "triggers": [
+          "CROSS_SERIES_MACRO_GATE"
+        ]
+      }
+    ],
+    "crisis_check": "not_applicable: no registered crisis anchor inside the replay period",
+    "end": "2026-10-01",
+    "false_alarm_budget_per_year": 1.0,
+    "false_alarms_per_year": 0.267,
+    "months": 45,
+    "start": "2023-01-01",
+    "verdict": "PASS",
+    "watch_count": 3,
+    "watch_episodes": [
+      {
+        "end": "2025-02",
+        "months": 1,
+        "peak": {
+          "fusion_z": 0.03,
+          "macro_cusum_down": 14.06,
+          "trend_z": -0.247
+        },
+        "start": "2025-02",
+        "state": "WATCH",
+        "triggers": [
+          "C4_relay:WCOILBRENTEU"
+        ]
+      },
+      {
+        "end": "2026-05",
+        "months": 2,
+        "peak": {
+          "fusion_z": 0.668,
+          "macro_cusum_down": 10.351,
+          "trend_z": -0.886
+        },
+        "start": "2026-04",
+        "state": "WATCH",
+        "triggers": [
+          "C4_relay:WCOILBRENTEU"
+        ]
+      },
+      {
+        "end": "2026-08",
+        "months": 1,
+        "peak": {
+          "fusion_z": 1.056,
+          "macro_cusum_down": 7.498,
+          "trend_z": -1.58
+        },
+        "start": "2026-08",
+        "state": "WATCH",
+        "triggers": [
+          "C4_relay:WCOILBRENTEU"
+        ]
+      }
+    ],
+    "years": 3.748
+  },
+  "thresholds": {
+    "fusion": {
+      "feature": "icsa_payems_fusion",
+      "quantile": 0.95,
+      "threshold": 2.672005
+    },
+    "monthly": {
+      "macro_gate": {
+        "combination": "CROSS_SERIES_MACRO_GATE",
+        "cusum_slack": 0.5,
+        "cusum_thr": 4.0,
+        "huber_thr": 4.0,
+        "lead": "long",
+        "lead_steps": 12,
+        "resonance_months": 2,
+        "window": "fast",
+        "window_months": 18
+      },
+      "trend_slope": {
+        "baseline": 24,
+        "k": 6,
+        "series": "UNRATE",
+        "thr": 2.0
+      }
+    },
+    "pinned_at": "2026-11-27",
+    "provenance": {
+      "fusion_threshold": "results/c4_state_vector_summary.json (FUSION q0.95)",
+      "macro_gate": "v2.0 noise-budgeted winner, frozen",
+      "ph_down_unlatch": "Page-Hinkley decay floor used to clear the Brent latch",
+      "trend_slope": "v3.0 trend relay, selected on pre-2005 UNRATE anchors",
+      "weekly_relay": "results/c4_state_vector_summary.json (pre-2005 quantiles)"
+    },
+    "version": "1.0.0",
+    "weekly_relay": {
+      "ICSA": {
+        "feature": "sahm_floor_displacement",
+        "quantile": 0.9,
+        "threshold": 0.358678
+      },
+      "WCOILBRENTEU": {
+        "features": {
+          "l1_slope_break": 0.174103,
+          "ph_up": 0.282109,
+          "trend_slope_z": 1.76103
+        },
+        "ph_down_unlatch": 0.05,
+        "quantiles": {
+          "l1_slope_break": 0.999,
+          "ph_up": 0.995,
+          "trend_slope_z": 0.95
+        }
+      },
+      "trailing_weeks": 4
+    }
+  },
+  "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277"
+}

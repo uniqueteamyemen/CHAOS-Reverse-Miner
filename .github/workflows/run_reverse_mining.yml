@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: "0 14 * * *"
 
 permissions:
   contents: write
@@ -44,6 +46,9 @@ jobs:
 
       - name: Run blind holdout validator
         run: python -m stress_test.blind_validator
+
+      - name: Run production engine
+        run: python -m production.chaos_engine
 
       - name: Show generated results
         run: |
