@@ -1,5 +1,7 @@
 # CHAOS-Reverse-Miner
 
+![Run Reverse Mining](https://github.com/uniqueteamyemen/CHAOS-Reverse-Miner/actions/workflows/run_reverse_mining.yml/badge.svg)
+
 > **Post-mortem-first detector discovery for economic and structural time series.**
 > Start from what actually happened, walk backwards, and keep only the detector
 > formulas that would have fired on time without crying wolf.
@@ -243,5 +245,5 @@ it commits nothing.
 |---|---|
 | Structured repository + code | implemented |
 | Local end-to-end run on real FRED data | executed, outputs committed |
-| GitHub Actions workflow | defined; first run verification in progress |
+| GitHub Actions workflow | defined; first run **verified green** (mining, blind report, artifact, commit-back) |
 | Blind holdout | executed, 4/6 hits, reported as-is |
