@@ -1,6 +1,6 @@
 # Blind Holdout Report - CHAOS-Reverse-Miner v2.0
 
-Generated: `2026-11-26T21:28:01+00:00`
+Generated: `2026-11-26T22:34:47+00:00`
 
 Every number below is computed by `python -m stress_test.blind_validator` from
 the raw FRED bytes fingerprinted in section 2. Nothing is estimated.
@@ -233,8 +233,8 @@ feature's own history.
 
 | Series | Features (pre-2005 quantile) | Train catches | Cold catches | Cold FA |
 |---|---|---|---|---|
-| WCOILBRENTEU:+1 | ph_up (q0.995), l1_slope_break (q0.999), trend_slope_z (q0.95) | 1/1, 1/1, 1/1 | 1/1 | 20 |
 | ICSA:+1 | sahm_floor_displacement (q0.9) | 1/4 | 1/1 | 8 |
+| WCOILBRENTEU:+1 | ph_up (q0.995), l1_slope_break (q0.999), trend_slope_z (q0.95) | 1/1, 1/1, 1/1 | 1/1 | 20 |
 
 Relay cold catches: **2/3** (COVID_ICSA_2020, UKRAINE_OIL_2022),
 relay false alarms: **28**. All qualified features per series are OR-ed;
