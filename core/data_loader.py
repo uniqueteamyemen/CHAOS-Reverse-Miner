@@ -37,7 +37,7 @@ SERIES_CATALOG: dict[str, str] = {
     "UNRATE": "Civilian Unemployment Rate (monthly, percent)",
     "PAYEMS": "All Employees, Total Nonfarm (monthly, thousands of persons)",
     "ICSA": "Initial Claims (weekly, seasonally adjusted)",
-    "WCOILBRENTEU": "Crude Oil Prices: Brent - Europe (monthly, USD/barrel)",
+    "WCOILBRENTEU": "Crude Oil Prices: Brent - Europe (weekly, USD/barrel)",
 }
 
 #: The 12 benchmark crisis / shock anchors required by the specification.
@@ -71,6 +71,65 @@ PAYEMS_PEAK_DATES: list[str] = [
 
 for _date in PAYEMS_PEAK_DATES:
     EVENTS.append((f"PAYEMS_PEAK_{_date[:4]}", "PAYEMS", _date, -1))
+
+
+#: Per-series conditioning: v2.0 treats growing series as relative changes and
+#: keeps UNRATE (a rate that can hit zero) on plain first differences.
+SERIES_PROFILES: dict[str, dict[str, str]] = {
+    "UNRATE": {"frequency": "monthly", "transform": "diff"},
+    "PAYEMS": {"frequency": "monthly", "transform": "log_return"},
+    "ICSA": {"frequency": "weekly", "transform": "log_return"},
+    "WCOILBRENTEU": {"frequency": "weekly", "transform": "log_return"},
+}
+
+#: Frequency-aware search geometry.  Window / lookback / gap / cooldown are all
+#: expressed in the native steps of the series, not in one shared calendar.
+FREQUENCY_PROFILES: dict[str, dict[str, object]] = {
+    "monthly": {
+        "windows": (18, 24, 36),
+        "cascade_gap": 3,
+        "cooldown": 6,
+    },
+    "weekly": {
+        "windows": (36, 44, 52),
+        "cascade_gap": 6,
+        "cooldown": 12,
+    },
+}
+
+#: A formula is defined once and mapped onto each series' own clock.  "fast"
+#: means an 18-month baseline for monthly data and a 36-week baseline for weekly
+#: data - the same *relative* horizon, not the same number of steps.
+WINDOW_POLICIES: dict[str, dict[str, int]] = {
+    "fast": {"monthly": 18, "weekly": 36},
+    "medium": {"monthly": 24, "weekly": 44},
+    "slow": {"monthly": 36, "weekly": 52},
+}
+
+#: Lookback lengths in native steps, again by policy.
+LEAD_POLICIES: dict[str, dict[str, int]] = {
+    "short": {"monthly": 4, "weekly": 6},
+    "medium": {"monthly": 6, "weekly": 12},
+    "long": {"monthly": 12, "weekly": 24},
+}
+
+
+def get_profiles() -> dict[str, dict[str, str]]:
+    """Return a copy of the per-series conditioning profiles."""
+    return {sid: dict(profile) for sid, profile in SERIES_PROFILES.items()}
+
+
+def get_frequency_profiles() -> dict[str, dict[str, object]]:
+    """Return a copy of the frequency-aware search geometry."""
+    return {freq: dict(profile) for freq, profile in FREQUENCY_PROFILES.items()}
+
+
+def get_window_policies() -> dict[str, dict[str, int]]:
+    return {name: dict(mapping) for name, mapping in WINDOW_POLICIES.items()}
+
+
+def get_lead_policies() -> dict[str, dict[str, int]]:
+    return {name: dict(mapping) for name, mapping in LEAD_POLICIES.items()}
 
 
 def _download(series_id: str, retries: int = 4, timeout: int = 90) -> bytes:

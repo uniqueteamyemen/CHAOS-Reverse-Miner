@@ -1,23 +1,89 @@
 {
-  "generated_at_utc": "2026-11-26T18:55:01+00:00",
-  "engine": "CHAOS-Reverse-Miner/reverse_miner",
+  "generated_at_utc": "2026-11-26T20:04:40+00:00",
+  "engine": "CHAOS-Reverse-Miner/reverse_miner-v2.0",
   "scoring": {
-    "score": "hit_rate_pct - 0.8 * false_alarms",
-    "cooldown_steps": 6,
+    "score": "catch_rate_pct - 15.0 * false_alarms_per_1000",
+    "qualification": "hits >= 1 and false_alarms_per_1000 <= 12.0 and catch_rate_pct >= 40.0",
     "grace_steps": 2,
-    "cascade_confirm_steps": 4,
-    "eligibility": "hits > 0 (a formula that never fires is not ranked as a detector)",
-    "diagnostic": "score_normalized = hit_rate_pct - 0.8 * false_alarms_per_1000_bars (not used for ranking)"
+    "macro_resonance_tolerance_months": 2
   },
   "grid": {
-    "windows": [
-      40,
-      60
-    ],
-    "lead_windows": [
-      3,
-      6,
-      12
+    "frequency_profiles": {
+      "monthly": {
+        "windows": [
+          18,
+          24,
+          36
+        ],
+        "cascade_gap": 3,
+        "cooldown": 6
+      },
+      "weekly": {
+        "windows": [
+          36,
+          44,
+          52
+        ],
+        "cascade_gap": 6,
+        "cooldown": 12
+      }
+    },
+    "window_policies": {
+      "fast": {
+        "monthly": 18,
+        "weekly": 36
+      },
+      "medium": {
+        "monthly": 24,
+        "weekly": 44
+      },
+      "slow": {
+        "monthly": 36,
+        "weekly": 52
+      }
+    },
+    "lead_policies": {
+      "short": {
+        "monthly": 4,
+        "weekly": 6
+      },
+      "medium": {
+        "monthly": 6,
+        "weekly": 12
+      },
+      "long": {
+        "monthly": 12,
+        "weekly": 24
+      }
+    },
+    "series_profiles": {
+      "UNRATE": {
+        "frequency": "monthly",
+        "transform": "diff"
+      },
+      "PAYEMS": {
+        "frequency": "monthly",
+        "transform": "log_return"
+      },
+      "ICSA": {
+        "frequency": "weekly",
+        "transform": "log_return"
+      },
+      "WCOILBRENTEU": {
+        "frequency": "weekly",
+        "transform": "log_return"
+      }
+    },
+    "combinations": [
+      "HUBER_ONLY",
+      "CUSUM_ONLY",
+      "OR_GATE",
+      "AND_GATE",
+      "CASCADE_HUBER_THEN_CUSUM",
+      "VOL_ACCELERATION_GATE",
+      "ACCEL_PLUS_HUBER",
+      "DUAL_SCALE_CASCADE",
+      "CROSS_SERIES_MACRO_GATE"
     ],
     "huber_thresholds": [
       4.0,
@@ -27,9 +93,11 @@
       16.0
     ],
     "cusum_thresholds": [
+      2.0,
+      3.0,
+      4.0,
       6.0,
       10.0,
-      15.0,
       20.0
     ],
     "vol_thresholds": [
@@ -37,8 +105,14 @@
       2.0,
       2.5
     ],
-    "formulas_evaluated": 384,
-    "formulas_eligible": 213
+    "accel_thresholds": [
+      1.0,
+      1.5,
+      2.0,
+      2.5
+    ],
+    "formulas_evaluated": 4572,
+    "formulas_qualified": 101
   },
   "data_fingerprint": {
     "UNRATE": {
@@ -192,255 +266,433 @@
     {
       "rank": 1,
       "name": "F1",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=slow, lead=medium, huber_thr=4.0, cusum_thr=20.0, cusum_slack=0.5)",
       "parameters": {
-        "window": 40,
-        "lead_w": 12,
+        "combination": "OR_GATE",
+        "window_policy": "slow",
+        "lead_policy": "medium",
         "huber_thr": 4.0,
-        "cusum_thr": 10.0,
-        "vol_thr": null
+        "cusum_thr": 20.0,
+        "cusum_slack": 0.5,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 36,
+          "weekly": 52
+        },
+        "lead_steps": {
+          "monthly": 6,
+          "weekly": 12
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=12, huber_thr=4.0, cusum_thr=10.0)",
       "metrics": {
-        "hits": 4,
+        "hits": 9,
         "events_total": 20,
-        "hit_rate_pct": 20.0,
+        "catch_rate_pct": 45.0,
         "false_alarms": 39,
-        "alarm_rate_per_1000": 4.229,
-        "score": -11.2,
-        "score_normalized": 16.617
+        "false_alarms_per_1000": 4.229,
+        "score": -18.428
       },
       "event_hits": [
+        "NBER_1969_PEAK",
         "GFC_LEHMAN_2008",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1980",
         "PAYEMS_PEAK_1981",
         "PAYEMS_PEAK_1990",
-        "PAYEMS_PEAK_2001"
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
       ]
     },
     {
       "rank": 2,
       "name": "F2",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=slow, lead=long, huber_thr=4.0, cusum_thr=20.0, cusum_slack=0.5)",
       "parameters": {
-        "window": 60,
-        "lead_w": 3,
-        "huber_thr": 8.0,
+        "combination": "OR_GATE",
+        "window_policy": "slow",
+        "lead_policy": "long",
+        "huber_thr": 4.0,
         "cusum_thr": 20.0,
-        "vol_thr": null
+        "cusum_slack": 0.5,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 36,
+          "weekly": 52
+        },
+        "lead_steps": {
+          "monthly": 12,
+          "weekly": 24
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=3, huber_thr=8.0, cusum_thr=20.0)",
       "metrics": {
-        "hits": 1,
+        "hits": 9,
         "events_total": 20,
-        "hit_rate_pct": 5.0,
-        "false_alarms": 21,
-        "alarm_rate_per_1000": 2.277,
-        "score": -11.8,
-        "score_normalized": 3.178
+        "catch_rate_pct": 45.0,
+        "false_alarms": 40,
+        "false_alarms_per_1000": 4.337,
+        "score": -20.055
       },
       "event_hits": [
-        "PAYEMS_PEAK_2001"
+        "NBER_1969_PEAK",
+        "GFC_LEHMAN_2008",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1980",
+        "PAYEMS_PEAK_1981",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
       ]
     },
     {
       "rank": 3,
       "name": "F3",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=slow, lead=short, huber_thr=4.0, cusum_thr=20.0, cusum_slack=0.5)",
       "parameters": {
-        "window": 60,
-        "lead_w": 6,
-        "huber_thr": 8.0,
+        "combination": "OR_GATE",
+        "window_policy": "slow",
+        "lead_policy": "short",
+        "huber_thr": 4.0,
         "cusum_thr": 20.0,
-        "vol_thr": null
+        "cusum_slack": 0.5,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 36,
+          "weekly": 52
+        },
+        "lead_steps": {
+          "monthly": 4,
+          "weekly": 6
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=6, huber_thr=8.0, cusum_thr=20.0)",
       "metrics": {
-        "hits": 1,
+        "hits": 9,
         "events_total": 20,
-        "hit_rate_pct": 5.0,
-        "false_alarms": 21,
-        "alarm_rate_per_1000": 2.277,
-        "score": -11.8,
-        "score_normalized": 3.178
+        "catch_rate_pct": 45.0,
+        "false_alarms": 40,
+        "false_alarms_per_1000": 4.337,
+        "score": -20.055
       },
       "event_hits": [
-        "PAYEMS_PEAK_2001"
+        "NBER_1969_PEAK",
+        "GFC_LEHMAN_2008",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1980",
+        "PAYEMS_PEAK_1981",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
       ]
     },
     {
       "rank": 4,
       "name": "F4",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=medium, lead=long, huber_thr=8.0, cusum_thr=20.0, cusum_slack=0.25)",
       "parameters": {
-        "window": 60,
-        "lead_w": 12,
+        "combination": "OR_GATE",
+        "window_policy": "medium",
+        "lead_policy": "long",
         "huber_thr": 8.0,
         "cusum_thr": 20.0,
-        "vol_thr": null
+        "cusum_slack": 0.25,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 24,
+          "weekly": 44
+        },
+        "lead_steps": {
+          "monthly": 12,
+          "weekly": 24
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=12, huber_thr=8.0, cusum_thr=20.0)",
       "metrics": {
-        "hits": 1,
+        "hits": 8,
         "events_total": 20,
-        "hit_rate_pct": 5.0,
-        "false_alarms": 21,
-        "alarm_rate_per_1000": 2.277,
-        "score": -11.8,
-        "score_normalized": 3.178
+        "catch_rate_pct": 40.0,
+        "false_alarms": 47,
+        "false_alarms_per_1000": 5.096,
+        "score": -36.439
       },
       "event_hits": [
-        "PAYEMS_PEAK_2001"
+        "NBER_1969_PEAK",
+        "NBER_1973_PEAK",
+        "NBER_1980_PEAK",
+        "NBER_1981_PEAK",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1981",
+        "PAYEMS_PEAK_2020"
       ]
     },
     {
       "rank": 5,
       "name": "F5",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=medium, lead=medium, huber_thr=6.0, cusum_thr=20.0, cusum_slack=0.25)",
       "parameters": {
-        "window": 40,
-        "lead_w": 12,
+        "combination": "OR_GATE",
+        "window_policy": "medium",
+        "lead_policy": "medium",
         "huber_thr": 6.0,
-        "cusum_thr": 10.0,
-        "vol_thr": null
+        "cusum_thr": 20.0,
+        "cusum_slack": 0.25,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 24,
+          "weekly": 44
+        },
+        "lead_steps": {
+          "monthly": 6,
+          "weekly": 12
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=12, huber_thr=6.0, cusum_thr=10.0)",
       "metrics": {
-        "hits": 2,
+        "hits": 9,
         "events_total": 20,
-        "hit_rate_pct": 10.0,
-        "false_alarms": 30,
-        "alarm_rate_per_1000": 3.253,
-        "score": -14.0,
-        "score_normalized": 7.398
+        "catch_rate_pct": 45.0,
+        "false_alarms": 51,
+        "false_alarms_per_1000": 5.53,
+        "score": -37.945
       },
       "event_hits": [
-        "PAYEMS_PEAK_1981",
-        "PAYEMS_PEAK_2001"
+        "NBER_1969_PEAK",
+        "NBER_1973_PEAK",
+        "NBER_1980_PEAK",
+        "NBER_1981_PEAK",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
       ]
     },
     {
       "rank": 6,
       "name": "F6",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=medium, lead=long, huber_thr=6.0, cusum_thr=20.0, cusum_slack=0.25)",
       "parameters": {
-        "window": 40,
-        "lead_w": 3,
+        "combination": "OR_GATE",
+        "window_policy": "medium",
+        "lead_policy": "long",
         "huber_thr": 6.0,
-        "cusum_thr": 15.0,
-        "vol_thr": null
+        "cusum_thr": 20.0,
+        "cusum_slack": 0.25,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 24,
+          "weekly": 44
+        },
+        "lead_steps": {
+          "monthly": 12,
+          "weekly": 24
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=3, huber_thr=6.0, cusum_thr=15.0)",
       "metrics": {
-        "hits": 1,
+        "hits": 9,
         "events_total": 20,
-        "hit_rate_pct": 5.0,
-        "false_alarms": 25,
-        "alarm_rate_per_1000": 2.711,
-        "score": -15.0,
-        "score_normalized": 2.832
+        "catch_rate_pct": 45.0,
+        "false_alarms": 52,
+        "false_alarms_per_1000": 5.638,
+        "score": -39.571
       },
       "event_hits": [
-        "PAYEMS_PEAK_2001"
+        "NBER_1969_PEAK",
+        "NBER_1973_PEAK",
+        "NBER_1980_PEAK",
+        "NBER_1981_PEAK",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
       ]
     },
     {
       "rank": 7,
       "name": "F7",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=medium, lead=short, huber_thr=6.0, cusum_thr=20.0, cusum_slack=0.25)",
       "parameters": {
-        "window": 40,
-        "lead_w": 6,
+        "combination": "OR_GATE",
+        "window_policy": "medium",
+        "lead_policy": "short",
         "huber_thr": 6.0,
-        "cusum_thr": 15.0,
-        "vol_thr": null
+        "cusum_thr": 20.0,
+        "cusum_slack": 0.25,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 24,
+          "weekly": 44
+        },
+        "lead_steps": {
+          "monthly": 4,
+          "weekly": 6
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=6, huber_thr=6.0, cusum_thr=15.0)",
       "metrics": {
-        "hits": 1,
+        "hits": 9,
         "events_total": 20,
-        "hit_rate_pct": 5.0,
-        "false_alarms": 25,
-        "alarm_rate_per_1000": 2.711,
-        "score": -15.0,
-        "score_normalized": 2.832
+        "catch_rate_pct": 45.0,
+        "false_alarms": 53,
+        "false_alarms_per_1000": 5.747,
+        "score": -41.198
       },
       "event_hits": [
-        "PAYEMS_PEAK_2001"
+        "NBER_1969_PEAK",
+        "NBER_1973_PEAK",
+        "NBER_1980_PEAK",
+        "NBER_1981_PEAK",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
       ]
     },
     {
       "rank": 8,
       "name": "F8",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=slow, lead=long, huber_thr=6.0, cusum_thr=10.0, cusum_slack=0.5)",
       "parameters": {
-        "window": 40,
-        "lead_w": 12,
+        "combination": "OR_GATE",
+        "window_policy": "slow",
+        "lead_policy": "long",
         "huber_thr": 6.0,
-        "cusum_thr": 15.0,
-        "vol_thr": null
+        "cusum_thr": 10.0,
+        "cusum_slack": 0.5,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 36,
+          "weekly": 52
+        },
+        "lead_steps": {
+          "monthly": 12,
+          "weekly": 24
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=12, huber_thr=6.0, cusum_thr=15.0)",
       "metrics": {
-        "hits": 1,
+        "hits": 8,
         "events_total": 20,
-        "hit_rate_pct": 5.0,
-        "false_alarms": 25,
-        "alarm_rate_per_1000": 2.711,
-        "score": -15.0,
-        "score_normalized": 2.832
+        "catch_rate_pct": 40.0,
+        "false_alarms": 52,
+        "false_alarms_per_1000": 5.638,
+        "score": -44.571
       },
       "event_hits": [
-        "PAYEMS_PEAK_2001"
+        "NBER_1969_PEAK",
+        "GFC_LEHMAN_2008",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1981",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
       ]
     },
     {
       "rank": 9,
       "name": "F9",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=medium, lead=medium, huber_thr=4.0, cusum_thr=20.0, cusum_slack=0.25)",
       "parameters": {
-        "window": 60,
-        "lead_w": 3,
-        "huber_thr": 8.0,
-        "cusum_thr": 15.0,
-        "vol_thr": null
+        "combination": "OR_GATE",
+        "window_policy": "medium",
+        "lead_policy": "medium",
+        "huber_thr": 4.0,
+        "cusum_thr": 20.0,
+        "cusum_slack": 0.25,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 24,
+          "weekly": 44
+        },
+        "lead_steps": {
+          "monthly": 6,
+          "weekly": 12
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=3, huber_thr=8.0, cusum_thr=15.0)",
       "metrics": {
-        "hits": 1,
+        "hits": 11,
         "events_total": 20,
-        "hit_rate_pct": 5.0,
-        "false_alarms": 25,
-        "alarm_rate_per_1000": 2.711,
-        "score": -15.0,
-        "score_normalized": 2.832
+        "catch_rate_pct": 55.0,
+        "false_alarms": 64,
+        "false_alarms_per_1000": 6.939,
+        "score": -49.088
       },
       "event_hits": [
-        "PAYEMS_PEAK_2001"
+        "NBER_1969_PEAK",
+        "NBER_1973_PEAK",
+        "NBER_1980_PEAK",
+        "NBER_1981_PEAK",
+        "GFC_LEHMAN_2008",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1980",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
       ]
     },
     {
       "rank": 10,
       "name": "F10",
-      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "combination": "OR_GATE",
+      "formula": "OR_GATE(window=medium, lead=long, huber_thr=4.0, cusum_thr=20.0, cusum_slack=0.25)",
       "parameters": {
-        "window": 60,
-        "lead_w": 6,
-        "huber_thr": 8.0,
-        "cusum_thr": 15.0,
-        "vol_thr": null
+        "combination": "OR_GATE",
+        "window_policy": "medium",
+        "lead_policy": "long",
+        "huber_thr": 4.0,
+        "cusum_thr": 20.0,
+        "cusum_slack": 0.25,
+        "vol_thr": null,
+        "accel_thr": null,
+        "windows": {
+          "monthly": 24,
+          "weekly": 44
+        },
+        "lead_steps": {
+          "monthly": 12,
+          "weekly": 24
+        }
       },
-      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=6, huber_thr=8.0, cusum_thr=15.0)",
       "metrics": {
-        "hits": 1,
+        "hits": 11,
         "events_total": 20,
-        "hit_rate_pct": 5.0,
-        "false_alarms": 25,
-        "alarm_rate_per_1000": 2.711,
-        "score": -15.0,
-        "score_normalized": 2.832
+        "catch_rate_pct": 55.0,
+        "false_alarms": 65,
+        "false_alarms_per_1000": 7.048,
+        "score": -50.714
       },
       "event_hits": [
-        "PAYEMS_PEAK_2001"
+        "NBER_1969_PEAK",
+        "NBER_1973_PEAK",
+        "NBER_1980_PEAK",
+        "NBER_1981_PEAK",
+        "GFC_LEHMAN_2008",
+        "NBER_2020_PEAK",
+        "COVID_ICSA_2020",
+        "PAYEMS_PEAK_1980",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001",
+        "PAYEMS_PEAK_2020"
       ]
     }
   ]

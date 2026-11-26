@@ -6,37 +6,33 @@
 > Start from what actually happened, walk backwards, and keep only the detector
 > formulas that would have fired on time without crying wolf.
 
-This is an **isolated** research repository. It has no link, submodule, fork
-relationship, or shared workflow with `uniqueteamyemen/CHAOS` and never writes to
-it.
+Isolated research repository — no fork, submodule, or workflow link to
+`uniqueteamyemen/CHAOS`, and it never writes there.
 
-**بالعربية:** هذا مستودع مستقل تماماً عن مستودع `CHAOS`. يبدأ المحرك من نقاط
-الأزمات التاريخية المعروفة ويمشي **إلى الخلف** ليبحث عن تركيبات كواشف رياضية
-كانت ستُنبّه قبل الحدث أو معه، مع معاقبة الإنذارات الكاذبة في فترات الهدوء.
-كل الأرقام في `results/` محسوبة من بيانات FRED الرسمية، ولا يوجد أي رقم مُقدَّر
-أو مُختلق.
+**بالعربية:** مستودع مستقل تماماً. النسخة 2.0 تُصلح عيب تشبّع حقيقياً في الكاشفات،
+وتضيف تحويلات مقياسية (عوائد لوغاريتمية)، ونوافذ واعية بالتردد الشهري/الأسبوعي،
+وكاشف تسارع الزخم، ورنيناً عمالياً بين البطالة والتوظيف. كل الأرقام محسوبة من
+بيانات FRED الرسمية، والتقرير الأعمى يُعلن بصراحة أن هدفَي 5/6 و«≤40 إنذاراً»
+غير قابلين للتحقق معاً على هذه البيانات، ويعرض الحدّ الفاصل المقيس.
 
 ---
 
-## 1. Why "reverse"?
+## 1. What v2.0 changes
 
-Forward-only gating (fire when a single threshold is crossed) is easy to tune and
-easy to fool. This engine inverts the workflow:
+v1.0 worked but had three engineering defects that v2.0 fixes:
 
-1. **Anchors** — a fixed registry of 20 historical crisis / shock dates
-   (12 specified anchors + 8 PAYEMS cycle peaks).
-2. **Backward lookback** — for each anchor, open a window of `lead_w` steps
-   *before* the anchor, plus a 2-step grace period after it.
-3. **Grid search** — evaluate hundreds of detector formulas (Huber-MAD CUSUM,
-   raw z-CUSUM, OR gates, cascades, volatility gates) over rolling baselines.
-4. **Scoring** — reward catching the anchor inside the window, punish every
-   distinct alarm wave that fires when nothing happens.
-5. **Blind validation** — freeze the winners, then test on shocks the miner
-   never saw (strict temporal split at 2005).
+| # | v1.0 defect | v2.0 fix |
+|---|---|---|
+| 1 | **Scale inflation** — raw differences of growing series made 2020s shocks 100× the 1970s ones | `PAYEMS`, `ICSA`, `WCOILBRENTEU` now use log-returns; `UNRATE` keeps first differences |
+| 2 | **Frequency mismatch** — monthly and weekly series shared window 40 / cooldown 6 | window policies `fast/medium/slow` = 18/24/36 months or 36/44/52 weeks; gaps 3/6 steps; cooldowns 6/12 |
+| 3 | **Siloed signals** — every series fired alone | cross-series labour resonance (UNRATE up + PAYEMS down within ±2 months) and the new momentum-acceleration cascade |
 
-The point is not to fit history. The point is to ask: *if we had run this detector
-in 1969, 1973, 1980, ... would it have helped, and how often would it have been
-wrong?*
+It also fixes a **critical detector bug** found while profiling v1.0: when more
+than half of a rolling window shares the same rounded value, the MAD is exactly
+zero and z-scores explode to ~10⁷. The CUSUM then saturates permanently — the
+UNRATE accumulator reached **1.4×10⁸** and never reset, which is where most of
+v1.0's "false alarms" came from. The scale is now floored at 0.25× the rolling
+standard deviation and z is capped at ±40.
 
 ## 2. Repository layout
 
@@ -45,205 +41,183 @@ CHAOS-Reverse-Miner/
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
-├── .github/
-│   └── workflows/
-│       └── run_reverse_mining.yml
+├── .github/workflows/run_reverse_mining.yml
 ├── core/
 │   ├── __init__.py
-│   ├── data_loader.py
-│   ├── detectors.py
-│   └── reverse_miner.py
+│   ├── data_loader.py      # FRED access, series/frequency profiles, 20 anchors
+│   ├── detectors.py        # log-returns, rolling Huber/z-CUSUM, vol ratio, acceleration
+│   └── reverse_miner.py    # 4,572-formula policy grid, resonance gate, scoring
 ├── stress_test/
 │   ├── __init__.py
-│   └── blind_validator.py
+│   └── blind_validator.py  # pre-2005 mining, cold post-2005 test, live radar
 └── results/
-    ├── .gitkeep
     ├── reverse_mining_leaderboard.csv
     ├── top_formulas.json
     └── blind_holdout_report.md
 ```
 
-`data/` is a **local cache only** (git-ignored). The workflow downloads the raw
-FRED CSVs on every run, so the repository stays small while the raw-byte
-fingerprints in `results/` keep the results auditable.
-
 ## 3. Data provenance
 
-| Series | FRED ID | Description | Frequency |
+| Series | FRED ID | Transform | Frequency |
 |---|---|---|---|
-| Unemployment rate | `UNRATE` | Civilian unemployment rate | monthly |
-| Nonfarm payrolls | `PAYEMS` | All employees, total nonfarm | monthly |
-| Initial claims | `ICSA` | Initial claims, seasonally adjusted | weekly |
-| Brent crude | `WCOILBRENTEU` | Crude oil, Brent, Europe | monthly |
+| Unemployment rate | `UNRATE` | first difference | monthly (945 obs) |
+| Nonfarm payrolls | `PAYEMS` | log-return | monthly (1,054 obs) |
+| Initial claims | `ICSA` | log-return | weekly (3,125 obs) |
+| Brent crude | `WCOILBRENTEU` | log-return | weekly (2,052 obs) |
 
-Access method: the **official public FRED CSV endpoint**, no API key:
+Official public endpoint, no key:
 
 ```text
 https://fred.stlouisfed.org/graph/fredgraph.csv?id=<SERIES_ID>
 ```
 
-The task brief abbreviated these endpoints to `https://stlouisfed.org`; the
-implementation uses the canonical `fred.stlouisfed.org/graph/fredgraph.csv`
-endpoint, which is the same official public source.
+If FRED is unreachable and no cached copy exists, the loader raises; it never
+fabricates a series. Every run stores the SHA-256, row count and date span of
+each raw CSV in `results/top_formulas.json` and in the blind report.
 
-Nothing is ever synthesised. If FRED is unreachable and no local cache exists,
-`data_loader` raises and the job fails instead of inventing a series.
+## 4. Detectors
 
-Every run records the SHA-256 of each raw CSV (plus row count and date span) in
-`results/top_formulas.json` and in the blind report, so any published number can
-be traced back to the exact bytes that produced it:
+All detectors run on the conditioned series (log-return or difference) with a
+rolling, never-frozen baseline:
 
-```
-source -> raw bytes -> parsing -> differencing -> detectors -> grid -> score -> results/
-```
-
-## 4. Detectors (`core/detectors.py`)
-
-All detectors run on the **first difference** of the level series. That
-stationarises series such as `PAYEMS` (a headcount that only grows) and prevents
-the accumulator saturation that static baselines suffer from.
-
-| # | Detector | Definition |
-|---|---|---|
-| 1 | `diffs` | `np.diff(x)`, aligned to the later observation |
-| 2 | `huber_cusum` | rolling median + rolling MAD (`window` = 40 / 60); `z = (x - med) / (1.4826 * MAD)`; Huber clipping `c = 1.345`; two-sided CUSUM with slack `k = 0.5` |
-| 3 | `raw_cusum` | same standardisation, **no** clipping — faster, noisier change detector |
-| 4 | `vol_ratio` | `std(6) / std(40)` — silent pre-crisis compression or expansion |
-
-Combinations scored by the miner:
-
-| Combination | Trigger rule |
+| Detector | Definition |
 |---|---|
-| `HUBER_ONLY` | `huber_cusum >= huber_thr` |
-| `CUSUM_ONLY` | `raw_cusum >= cusum_thr` |
-| `OR_GATE` | either of the two |
-| `CASCADE_HUBER_THEN_CUSUM` | Huber fires, CUSUM must confirm within 4 steps |
-| `VOL_ACCELERATION_GATE` | `vol_ratio >= vol_thr` **and** Huber confirms |
+| `huber_cusum` | rolling median + MAD, z floored and capped, Huber clipping `c=1.345`, two-sided CUSUM slack `k` |
+| `raw_cusum` | same z, **no** clipping, slack searched over `{0.1, 0.25, 0.5}` |
+| `vol_ratio` | `std(window/6) / std(window)` |
+| `accel_z` | EMA(3) of the conditioned series, its first difference, robustly standardised |
 
-Directions are respected: events with sign `+1` read the positive accumulator,
-sign `-1` (PAYEMS peaks, the 2014 oil decline) read the negative one.
+Combinations searched (4,572 formulas):
 
-## 5. Anchor registry
+`HUBER_ONLY`, `CUSUM_ONLY`, `OR_GATE`, `AND_GATE`,
+`CASCADE_HUBER_THEN_CUSUM`, `VOL_ACCELERATION_GATE`, `ACCEL_PLUS_HUBER`,
+`DUAL_SCALE_CASCADE`, `CROSS_SERIES_MACRO_GATE`.
 
-The 12 specified anchors, plus PAYEMS cycle peaks (`-1`) on the same NBER peak
-dates — 20 anchors in total:
+`CROSS_SERIES_MACRO_GATE` fires when upward UNRATE pressure and downward PAYEMS
+pressure confirm each other within ±2 months.
 
-```
-NBER_1969_PEAK   NBER_1973_PEAK   NBER_1980_PEAK   NBER_1981_PEAK
-NBER_1990_PEAK   NBER_2001_PEAK   NBER_2007_PEAK   GFC_LEHMAN_2008
-NBER_2020_PEAK   COVID_ICSA_2020  OIL_DECLINE_2014 UKRAINE_OIL_2022
-PAYEMS_PEAK_1969 1973 1980 1981 1990 2001 2007 2020
-```
-
-## 6. Search space
+## 5. Search geometry and scoring
 
 | Dimension | Grid |
 |---|---|
-| Rolling window | `40`, `60` |
-| Lookback `lead_w` | `3`, `6`, `12` steps |
-| Huber threshold | `4, 6, 8, 12, 16` |
-| CUSUM threshold | `6, 10, 15, 20` |
-| Volatility threshold | `1.5, 2.0, 2.5` |
-| Cooldown (episode dedup) | `6` steps |
-| Grace after anchor | `2` steps |
-| **Formulas evaluated** | **384** |
-
-## 7. Scoring — and an honest caveat
-
-The task specification defines:
+| Window policy | `fast` 18m/36w, `medium` 24m/44w, `slow` 36m/52w |
+| Lookback policy | `short` 4m/6w, `medium` 6m/12w, `long` 12m/24w |
+| Huber threshold | 4, 6, 8, 12, 16 |
+| CUSUM threshold | 2, 3, 4, 6, 10, 20 |
+| CUSUM slack | 0.1, 0.25, 0.5 |
+| Volatility threshold | 1.5, 2.0, 2.5 |
+| Acceleration threshold | 1.0, 1.5, 2.0, 2.5 |
+| Episode cooldown | 6 months / 12 weeks |
+| **Formulas** | **4,572** |
 
 ```
-Pragmatic Score = hit_rate_pct - 0.8 * false_alarms
+engineering_score = catch_rate_pct - 15 * false_alarms_per_1000
+false_alarms_per_1000 = 1000 * false_alarms / exposure_bars
 ```
 
-where `hit_rate_pct = 100 * hits / events` and `false_alarms` is the number of
-distinct alarm waves (6-step cooldown) outside every event window. That formula
-is implemented **exactly**, and `score` in the leaderboard is that number.
+Two guards are applied and disclosed:
 
-Two guards are applied, and both are disclosed rather than hidden:
+1. **Quiet-period definition.** The 12 months (24 weeks) after every anchor are
+   excluded: an alarm during a crisis is late confirmation, not crying wolf.
+2. **Qualification.** `hits >= 1`, `false_alarms_per_1000 <= 12`, and
+   `catch_rate_pct >= 40`. A formula that never fires is not a detector and is
+   left unranked.
 
-1. **Eligibility.** A formula that never fires scores `0` and would beat every
-   active detector on a 78-year timeline. Such formulas are marked
-   `eligible = false` and left unranked. Only formulas with at least one hit are
-   ranked.
-2. **Diagnostic column.** `alarm_rate_per_1000` normalises the false-alarm count
-   by exposure, and `score_normalized = hit_rate_pct - 0.8 * alarm_rate_per_1000`
-   is reported for comparison. It is **not** used for ranking.
+The 40 % catch floor exists because the raw score still rewards near-silence:
+with ~78 years of exposure one alarm costs about a third of a catch. Both the
+score and the guard are written into `top_formulas.json`.
 
-Why the caveat matters, with numbers from this repository: over the full
-timeline the best active formula scores **-11.2** (4/20 hits, 39 false alarms),
-while a formula that never fires scores **0**. The specified score charges the
-same 0.8 per alarm whether the quiet stretch is 78 years or 5, so it is not
-comparable across different time splits — see the blind report, where the
-pre-2005 training winner scores **+6.47** on its own (shorter) window. The
-leaderboard faithfully ranks by the specified objective; the normalised column
-exists so the trade-off can be judged on a per-opportunity basis.
+## 6. Results
 
-## 8. Results snapshot
+### Global leaderboard (all anchors, `results/reverse_mining_leaderboard.csv`)
 
-Produced by the runs recorded in `results/` (refresh on every push):
-
-**Global leaderboard** (`results/reverse_mining_leaderboard.csv`, 384 rows):
-
-| Rank | Formula | Hits | Hit rate | False alarms | Score |
+| Rank | Formula | Catches | FA | FA/1000 | Score |
 |---|---|---|---|---|---|
-| 1 | `CASCADE_HUBER_THEN_CUSUM(window=40, lead=12, huber=4, cusum=10)` | 4/20 | 20 % | 39 | -11.2 |
-| 2 | `CASCADE_HUBER_THEN_CUSUM(window=60, lead=3, huber=8, cusum=20)` | 1/20 | 5 % | 21 | -11.8 |
-| 3 | `CASCADE_HUBER_THEN_CUSUM(window=60, lead=6, huber=8, cusum=20)` | 1/20 | 5 % | 21 | -11.8 |
+| 1 | `OR_GATE(window=slow, lead=medium, huber=4, cusum=20, slack=0.5)` | 9/20 (45 %) | 39 | 4.23 | -18.43 |
+| 2 | `OR_GATE(window=slow, lead=long, huber=4, cusum=20, slack=0.5)` | 9/20 | 40 | 4.34 | -20.06 |
 
-**Blind holdout** (`results/blind_holdout_report.md`): mined on pre-2005 anchors
-only, frozen, then tested on six post-2005 shocks — **4/6 hits** (GFC 2008,
-COVID peak, COVID claims, Ukraine oil), 89 false alarms in the post-2005 era,
-score -4.53. `2007` and the 2014 oil decline were missed. Both the misses and the
-negative score are reported unchanged.
+### Blind holdout (pre-2005 only → post-2005 cold test)
 
-## 9. Reproduce locally
+- **Noise-budgeted champion**: `CROSS_SERIES_MACRO_GATE(fast/long, huber=4,
+  cusum=4, slack=0.5)` — training 8/12 (66.7 %), cold **2/6 with 5 false alarms**.
+- **Recall-first profile**: `CUSUM_ONLY(slow, medium, cusum=2, slack=0.25)` —
+  training 12/12, cold **5/6 with 192 false alarms**.
+
+The measured frontier (same family, threshold varied) is the central result:
+
+| CUSUM threshold | Cold catches | Cold alarms |
+|---|---|---|
+| 2 | 5/6 | 192 |
+| 3 | 4/6 | 145 |
+| 4 | 4/6 | 111 |
+| 6 | 4/6 | 73 |
+| 10 | 3/6 | 36 |
+| 20 | 2/6 | 6 |
+
+**The two v2.0 targets are mutually exclusive on this data.** 5/6 is reachable
+only by accepting ~192 alarms; staying under 40 alarms caps recall at 3/6. No
+formula in the 4,572-formula search satisfies both, and this repository does not
+claim otherwise.
+
+### v1.0 vs v2.0
+
+| Metric | v1.0 | v2.0 |
+|---|---|---|
+| Detector scale | raw diffs, saturating MAD bug | log-returns, floored scale, z-capped |
+| Formulas searched | 384 | 4,572 |
+| Global best catches | 4/20 | 9/20 |
+| Blind champion | 4/6 @ 89 alarms | 2/6 @ **5** alarms (noise-first) |
+| Blind recall-first | — | 5/6 @ 192 alarms |
+| Both targets met | no | **no (proven trade-off)** |
+
+v1.0's 4/6 was partly an artefact of the saturation bug: alarms fired almost
+everywhere. v2.0 can reproduce 4/6 with 73 alarms, but not 5/6 under 40.
+
+## 7. Live radar (2025–2026)
+
+`results/blind_holdout_report.md` ends with the last 12 observations of all four
+series, showing the exact Huber and CUSUM accumulators, volatility ratio,
+acceleration z, and whether the frozen champion fires. As of the committed
+snapshot (UNRATE through 2026-10, ICSA through 2026-11-21, Brent through
+2026-09-04) **no series is firing**.
+
+## 8. Reproduce locally
 
 ```bash
 python -m venv .venv
 # Windows: .venv\Scripts\activate    POSIX: source .venv/bin/activate
 pip install -r requirements.txt
 
-python -m core.reverse_miner        # downloads data/, writes leaderboard + JSON
-python -m stress_test.blind_validator  # writes results/blind_holdout_report.md
+python -m core.reverse_miner            # ~2-3 min, writes leaderboard + JSON
+python -m stress_test.blind_validator   # ~2 min, writes blind report
 ```
 
-Optional flags: `--force-refresh` (re-download FRED), `--results-dir`,
-`--top-n`.
+## 9. CI
 
-## 10. Continuous integration
+`.github/workflows/run_reverse_mining.yml` runs on push to `main` and on
+`workflow_dispatch`: checkout → Python 3.11 → install → miner → blind validator
+→ artifact upload → commit changed `results/` back to `main` with `[skip ci]`.
 
-`.github/workflows/run_reverse_mining.yml` runs on every push to `main` and on
-`workflow_dispatch`:
+## 10. Limitations
 
-1. checkout
-2. Python 3.11 + `pip install -r requirements.txt`
-3. `python -m core.reverse_miner`
-4. `python -m stress_test.blind_validator`
-5. upload `results/` as an artifact
-6. commit changed files in `results/` back to `main` (`[skip ci]`)
+1. **Sample size.** 20 anchors, 6 in the holdout. Six binary outcomes are a
+   sanity check, not statistical proof.
+2. **Untrained weekly series.** ICSA and Brent have no pre-2005 anchor, so their
+   thresholds are inherited from monthly evidence; their cold behaviour is
+   genuinely out-of-sample but untuned.
+3. **Release lags.** Anchors use official event dates; live data arrives revised.
+4. **The score's calibration.** A 0.8-or-15-point penalty per alarm is not
+   scale-free across 78 years of monthly data, which is why the champion rule is
+   stated explicitly in the report instead of being inferred from the score.
+5. **Not a trading system.** No costs, covariates or regime model.
 
-The commit-back step makes the workflow idempotent: if the numbers are unchanged
-it commits nothing.
-
-## 11. Limitations
-
-- **Small sample.** 20 anchors, 6 of them in the blind holdout. This is a
-  benchmark, not statistical proof.
-- **No release lags.** Anchors use official event dates; a live system would only
-  see revised or delayed releases.
-- **Coarse grid.** Thresholds are discrete; the leaderboard is a discrete
-  optimum, not a global one.
-- **Retrospective.** The engine describes what *would have* fired, not what a
-  trading or policy system should do.
-- **Shared shocks.** GFC and COVID are entangled in several series; a hit there
-  is not evidence of an independent precursor mechanism.
-
-## 12. Status
+## 11. Status
 
 | Item | State |
 |---|---|
-| Structured repository + code | implemented |
-| Local end-to-end run on real FRED data | executed, outputs committed |
-| GitHub Actions workflow | defined; first run **verified green** (mining, blind report, artifact, commit-back) |
-| Blind holdout | executed, 4/6 hits, reported as-is |
+| v2.0 code + frequency-aware grammar | implemented |
+| Local full run on real FRED data | executed |
+| 4,572-formula search | executed |
+| Blind cold test + live radar | executed |
+| CI pipeline | verified green |
+| 5/6 catch **and** ≤40 alarms | **not achieved — measured trade-off documented** |
