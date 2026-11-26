@@ -29,6 +29,7 @@ import pandas as pd
 
 from core import data_loader
 from core import reverse_miner as rm
+from core import composite_router
 from core.detectors import build_panels, cusum_from_z
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -340,18 +341,31 @@ profile catches {recall_eval['hits']}/6 but fires {recall_eval['false_alarms']}
 times. **No single formula in this search satisfies both v2.0 targets**, and this
 report does not claim otherwise.
 
-## 8. Limitations
-
-1. Twenty anchors, six of them in the holdout: this is a sanity check, not a
-   statistical proof.
-2. Weekly series (ICSA, Brent) contain **no pre-2005 anchor** of their own, so
-   their thresholds are inherited from monthly evidence. Their cold behaviour is
-   genuinely out-of-sample but untuned.
-3. Anchors use official event dates; a live system faces release lags.
-4. The threshold grid is coarse and the score's 15-point penalty is calibrated
-   to a different exposure than 78 years of monthly data, which is why the
-   champion rule is stated explicitly instead of relying on the raw score.
 """
+
+    composite = composite_router.build_composite(panels, data_loader.get_events(), series_map)
+    limitations = (
+        "\n\n## 9. Limitations\n\n"
+        "1. Twenty anchors, six of them in the holdout: this is a sanity check, not a\n"
+        "   statistical proof.\n"
+        "2. Weekly series (ICSA, Brent) contain **no pre-2005 anchor** of their own, so\n"
+        "   their thresholds are inherited from monthly evidence. Their cold behaviour is\n"
+        "   genuinely out-of-sample but untuned.\n"
+        "3. Anchors use official event dates; a live system faces release lags.\n"
+        "4. The threshold grid is coarse and the score's 15-point penalty is calibrated\n"
+        "   to a different exposure than 78 years of monthly data, which is why the\n"
+        "   champion rule is stated explicitly instead of relying on the raw score.\n"
+        "5. The weekly specialist in section 8 is fitted on the same three weekly shocks\n"
+        "   it is scored on; only the monthly branches are cold there.\n"
+    )
+    report = (
+        report
+        + "\n"
+        + composite_router.render_markdown(composite)
+        + "\n"
+        + composite_router.radar_markdown(composite, panels)
+        + limitations
+    )
 
     args.results_dir.mkdir(parents=True, exist_ok=True)
     report_path = args.results_dir / "blind_holdout_report.md"

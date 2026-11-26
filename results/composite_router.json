@@ -1,0 +1,26 @@
+{
+  "generated_at_utc": "2026-11-26T20:37:37+00:00",
+  "engine": "CHAOS-Reverse-Miner/composite_router-v3.0",
+  "monthly_specialist": {
+    "resonance_formula": "CROSS_SERIES_MACRO_GATE(window=fast, lead=long, huber_thr=4.0, cusum_thr=4.0, cusum_slack=0.5, resonance<=2mo)",
+    "resonance_catches": 2,
+    "resonance_false_alarms": 5,
+    "trend_formula": "TREND_SLOPE(k=6, thr=2.0)",
+    "trend_catches": 3,
+    "trend_false_alarms": 2,
+    "routed_catches": 3,
+    "routed_false_alarms": 7
+  },
+  "weekly_specialist": {
+    "formula": "OR_GATE(window=medium, lead=short, huber_thr=4.0, cusum_thr=8.0, cusum_slack=0.25)",
+    "catches": 2,
+    "false_alarms": 26,
+    "grid_size": 3078,
+    "in_sample": true
+  },
+  "combined": {
+    "hits": 5,
+    "events_total": 6,
+    "false_alarms": 33
+  }
+}

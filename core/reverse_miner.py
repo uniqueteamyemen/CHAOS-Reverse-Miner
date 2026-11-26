@@ -370,6 +370,8 @@ def evaluate_config(
     events: list[tuple[str, str, str, int]],
     cache: dict[tuple[object, ...], object] | None = None,
     false_alarm_range: tuple[str | None, str | None] = (None, None),
+    series_filter: set[str] | None = None,
+    cooldown_override: int | None = None,
 ) -> dict[str, object]:
     if str(config["combination"]) == "CROSS_SERIES_MACRO_GATE":
         return _evaluate_macro(config, panels, events, cache, false_alarm_range)
@@ -377,6 +379,8 @@ def evaluate_config(
     grouped: dict[tuple[str, int], list[tuple[str, str, str, int]]] = {}
     for event in events:
         _, series_id, _, sign = event
+        if series_filter is not None and series_id not in series_filter:
+            continue
         grouped.setdefault((series_id, int(sign)), []).append(event)
 
     matched: set[tuple[str, int, int]] = set()
@@ -390,6 +394,8 @@ def evaluate_config(
     for (series_id, direction), group in grouped.items():
         frequency = str(data_loader.SERIES_PROFILES[series_id]["frequency"])
         resolved = resolve(config, frequency)
+        if cooldown_override is not None:
+            resolved["cooldown"] = int(cooldown_override)
         panel = panels.get((series_id, resolved["window"]))
         if panel is None:
             continue

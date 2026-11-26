@@ -153,6 +153,34 @@ def momentum_acceleration(values: np.ndarray, window: int, span: int = ACCEL_SPA
     return z
 
 
+def trend_slope_z(series: pd.Series, k: int, baseline: int = 24) -> np.ndarray:
+    """Robust z-score of the rolling OLS slope of the *level* series.
+
+    A k-step slope turns positive while the level is still near its trough, so it
+    catches slow turn-arounds (2007, 2001) that a difference-based CUSUM only
+    sees after the level has already moved.  The slope is standardised against a
+    rolling median/MAD of its own history (baseline window), with the same
+    variance floor as the other detectors.
+    """
+    values = series.to_numpy(dtype=float)
+    n = values.size
+    slopes = np.full(n, np.nan)
+    if n >= k and k >= 2:
+        x = np.arange(k, dtype=float)
+        xc = x - x.mean()
+        denominator = float(np.dot(xc, xc))
+        for i in range(k - 1, n):
+            slopes[i] = float(np.dot(xc, values[i - k + 1 : i + 1]) / denominator)
+    slope_series = pd.Series(slopes)
+    median = slope_series.rolling(baseline, min_periods=baseline).median()
+    mad = (slope_series - median).abs().rolling(baseline, min_periods=baseline).median()
+    std = slope_series.rolling(baseline, min_periods=baseline).std(ddof=1)
+    z = (slopes - median.to_numpy()) / robust_scale(
+        mad.to_numpy(), std.to_numpy()
+    )
+    return np.clip(z, -Z_CAP, Z_CAP)
+
+
 # --------------------------------------------------------------------------- #
 # Panel
 # --------------------------------------------------------------------------- #
