@@ -1,6 +1,6 @@
 # Cycle C4 - StateVector & Backward Precursor Discovery
 
-Generated: `2026-11-26T21:20:24+00:00`
+Generated: `2026-11-26T21:27:42+00:00`
 
 All features are continuous; every threshold below is an **empirical quantile of
 the feature's own pre-2005 history**. No external level (`0.35`, `-0.22`, `-6.0`)
