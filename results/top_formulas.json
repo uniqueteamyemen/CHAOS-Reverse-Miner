@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-26T20:49:17+00:00",
+  "generated_at_utc": "2026-11-26T20:58:28+00:00",
   "engine": "CHAOS-Reverse-Miner/reverse_miner-v2.0",
   "scoring": {
     "score": "catch_rate_pct - 15.0 * false_alarms_per_1000",
