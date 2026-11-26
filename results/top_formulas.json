@@ -1,0 +1,447 @@
+{
+  "generated_at_utc": "2026-11-26T18:48:41+00:00",
+  "engine": "CHAOS-Reverse-Miner/reverse_miner",
+  "scoring": {
+    "score": "hit_rate_pct - 0.8 * false_alarms",
+    "cooldown_steps": 6,
+    "grace_steps": 2,
+    "cascade_confirm_steps": 4,
+    "eligibility": "hits > 0 (a formula that never fires is not ranked as a detector)",
+    "diagnostic": "score_normalized = hit_rate_pct - 0.8 * false_alarms_per_1000_bars (not used for ranking)"
+  },
+  "grid": {
+    "windows": [
+      40,
+      60
+    ],
+    "lead_windows": [
+      3,
+      6,
+      12
+    ],
+    "huber_thresholds": [
+      4.0,
+      6.0,
+      8.0,
+      12.0,
+      16.0
+    ],
+    "cusum_thresholds": [
+      6.0,
+      10.0,
+      15.0,
+      20.0
+    ],
+    "vol_thresholds": [
+      1.5,
+      2.0,
+      2.5
+    ],
+    "formulas_evaluated": 384,
+    "formulas_eligible": 213
+  },
+  "data_fingerprint": {
+    "UNRATE": {
+      "sha256": "fb669461abc34e00324b940be6bad1c7f89117652f28587196a7b8bf4a9f56a1",
+      "rows": 945,
+      "start": "1948-01-01",
+      "end": "2026-10-01"
+    },
+    "PAYEMS": {
+      "sha256": "968f9252d00246e2b6cf40307e01eef7a413ec936fcc45c7498347a509a2dc32",
+      "rows": 1054,
+      "start": "1939-01-01",
+      "end": "2026-10-01"
+    },
+    "ICSA": {
+      "sha256": "0de31121f29da6baa5378877086cdc450447fdbd2d6186059f586bf79543f25b",
+      "rows": 3125,
+      "start": "1967-01-07",
+      "end": "2026-11-21"
+    },
+    "WCOILBRENTEU": {
+      "sha256": "72a5e568a787f6babe4d25b84c76be739cc0b12b6f0b8fad8c16be07a12fb3f9",
+      "rows": 2052,
+      "start": "1987-05-15",
+      "end": "2026-09-04"
+    }
+  },
+  "events": [
+    {
+      "name": "NBER_1969_PEAK",
+      "series": "UNRATE",
+      "date": "1969-12-01",
+      "direction": 1
+    },
+    {
+      "name": "NBER_1973_PEAK",
+      "series": "UNRATE",
+      "date": "1973-11-01",
+      "direction": 1
+    },
+    {
+      "name": "NBER_1980_PEAK",
+      "series": "UNRATE",
+      "date": "1980-01-01",
+      "direction": 1
+    },
+    {
+      "name": "NBER_1981_PEAK",
+      "series": "UNRATE",
+      "date": "1981-07-01",
+      "direction": 1
+    },
+    {
+      "name": "NBER_1990_PEAK",
+      "series": "UNRATE",
+      "date": "1990-07-01",
+      "direction": 1
+    },
+    {
+      "name": "NBER_2001_PEAK",
+      "series": "UNRATE",
+      "date": "2001-03-01",
+      "direction": 1
+    },
+    {
+      "name": "NBER_2007_PEAK",
+      "series": "UNRATE",
+      "date": "2007-12-01",
+      "direction": 1
+    },
+    {
+      "name": "GFC_LEHMAN_2008",
+      "series": "UNRATE",
+      "date": "2008-09-15",
+      "direction": 1
+    },
+    {
+      "name": "NBER_2020_PEAK",
+      "series": "UNRATE",
+      "date": "2020-02-01",
+      "direction": 1
+    },
+    {
+      "name": "COVID_ICSA_2020",
+      "series": "ICSA",
+      "date": "2020-03-11",
+      "direction": 1
+    },
+    {
+      "name": "OIL_DECLINE_2014",
+      "series": "WCOILBRENTEU",
+      "date": "2014-06-01",
+      "direction": -1
+    },
+    {
+      "name": "UKRAINE_OIL_2022",
+      "series": "WCOILBRENTEU",
+      "date": "2022-02-24",
+      "direction": 1
+    },
+    {
+      "name": "PAYEMS_PEAK_1969",
+      "series": "PAYEMS",
+      "date": "1969-12-01",
+      "direction": -1
+    },
+    {
+      "name": "PAYEMS_PEAK_1973",
+      "series": "PAYEMS",
+      "date": "1973-11-01",
+      "direction": -1
+    },
+    {
+      "name": "PAYEMS_PEAK_1980",
+      "series": "PAYEMS",
+      "date": "1980-01-01",
+      "direction": -1
+    },
+    {
+      "name": "PAYEMS_PEAK_1981",
+      "series": "PAYEMS",
+      "date": "1981-07-01",
+      "direction": -1
+    },
+    {
+      "name": "PAYEMS_PEAK_1990",
+      "series": "PAYEMS",
+      "date": "1990-07-01",
+      "direction": -1
+    },
+    {
+      "name": "PAYEMS_PEAK_2001",
+      "series": "PAYEMS",
+      "date": "2001-03-01",
+      "direction": -1
+    },
+    {
+      "name": "PAYEMS_PEAK_2007",
+      "series": "PAYEMS",
+      "date": "2007-12-01",
+      "direction": -1
+    },
+    {
+      "name": "PAYEMS_PEAK_2020",
+      "series": "PAYEMS",
+      "date": "2020-02-01",
+      "direction": -1
+    }
+  ],
+  "formulas": [
+    {
+      "rank": 1,
+      "name": "F1",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 40,
+        "lead_w": 12,
+        "huber_thr": 4.0,
+        "cusum_thr": 10.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=12, huber_thr=4.0, cusum_thr=10.0)",
+      "metrics": {
+        "hits": 4,
+        "events_total": 20,
+        "hit_rate_pct": 20.0,
+        "false_alarms": 39,
+        "alarm_rate_per_1000": 4.229,
+        "score": -11.2,
+        "score_normalized": 16.617
+      },
+      "event_hits": [
+        "GFC_LEHMAN_2008",
+        "PAYEMS_PEAK_1981",
+        "PAYEMS_PEAK_1990",
+        "PAYEMS_PEAK_2001"
+      ]
+    },
+    {
+      "rank": 2,
+      "name": "F2",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 60,
+        "lead_w": 3,
+        "huber_thr": 8.0,
+        "cusum_thr": 20.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=3, huber_thr=8.0, cusum_thr=20.0)",
+      "metrics": {
+        "hits": 1,
+        "events_total": 20,
+        "hit_rate_pct": 5.0,
+        "false_alarms": 21,
+        "alarm_rate_per_1000": 2.277,
+        "score": -11.8,
+        "score_normalized": 3.178
+      },
+      "event_hits": [
+        "PAYEMS_PEAK_2001"
+      ]
+    },
+    {
+      "rank": 3,
+      "name": "F3",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 60,
+        "lead_w": 6,
+        "huber_thr": 8.0,
+        "cusum_thr": 20.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=6, huber_thr=8.0, cusum_thr=20.0)",
+      "metrics": {
+        "hits": 1,
+        "events_total": 20,
+        "hit_rate_pct": 5.0,
+        "false_alarms": 21,
+        "alarm_rate_per_1000": 2.277,
+        "score": -11.8,
+        "score_normalized": 3.178
+      },
+      "event_hits": [
+        "PAYEMS_PEAK_2001"
+      ]
+    },
+    {
+      "rank": 4,
+      "name": "F4",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 60,
+        "lead_w": 12,
+        "huber_thr": 8.0,
+        "cusum_thr": 20.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=12, huber_thr=8.0, cusum_thr=20.0)",
+      "metrics": {
+        "hits": 1,
+        "events_total": 20,
+        "hit_rate_pct": 5.0,
+        "false_alarms": 21,
+        "alarm_rate_per_1000": 2.277,
+        "score": -11.8,
+        "score_normalized": 3.178
+      },
+      "event_hits": [
+        "PAYEMS_PEAK_2001"
+      ]
+    },
+    {
+      "rank": 5,
+      "name": "F5",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 40,
+        "lead_w": 12,
+        "huber_thr": 6.0,
+        "cusum_thr": 10.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=12, huber_thr=6.0, cusum_thr=10.0)",
+      "metrics": {
+        "hits": 2,
+        "events_total": 20,
+        "hit_rate_pct": 10.0,
+        "false_alarms": 30,
+        "alarm_rate_per_1000": 3.253,
+        "score": -14.0,
+        "score_normalized": 7.398
+      },
+      "event_hits": [
+        "PAYEMS_PEAK_1981",
+        "PAYEMS_PEAK_2001"
+      ]
+    },
+    {
+      "rank": 6,
+      "name": "F6",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 40,
+        "lead_w": 3,
+        "huber_thr": 6.0,
+        "cusum_thr": 15.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=3, huber_thr=6.0, cusum_thr=15.0)",
+      "metrics": {
+        "hits": 1,
+        "events_total": 20,
+        "hit_rate_pct": 5.0,
+        "false_alarms": 25,
+        "alarm_rate_per_1000": 2.711,
+        "score": -15.0,
+        "score_normalized": 2.832
+      },
+      "event_hits": [
+        "PAYEMS_PEAK_2001"
+      ]
+    },
+    {
+      "rank": 7,
+      "name": "F7",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 40,
+        "lead_w": 6,
+        "huber_thr": 6.0,
+        "cusum_thr": 15.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=6, huber_thr=6.0, cusum_thr=15.0)",
+      "metrics": {
+        "hits": 1,
+        "events_total": 20,
+        "hit_rate_pct": 5.0,
+        "false_alarms": 25,
+        "alarm_rate_per_1000": 2.711,
+        "score": -15.0,
+        "score_normalized": 2.832
+      },
+      "event_hits": [
+        "PAYEMS_PEAK_2001"
+      ]
+    },
+    {
+      "rank": 8,
+      "name": "F8",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 40,
+        "lead_w": 12,
+        "huber_thr": 6.0,
+        "cusum_thr": 15.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=40, lead=12, huber_thr=6.0, cusum_thr=15.0)",
+      "metrics": {
+        "hits": 1,
+        "events_total": 20,
+        "hit_rate_pct": 5.0,
+        "false_alarms": 25,
+        "alarm_rate_per_1000": 2.711,
+        "score": -15.0,
+        "score_normalized": 2.832
+      },
+      "event_hits": [
+        "PAYEMS_PEAK_2001"
+      ]
+    },
+    {
+      "rank": 9,
+      "name": "F9",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 60,
+        "lead_w": 3,
+        "huber_thr": 8.0,
+        "cusum_thr": 15.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=3, huber_thr=8.0, cusum_thr=15.0)",
+      "metrics": {
+        "hits": 1,
+        "events_total": 20,
+        "hit_rate_pct": 5.0,
+        "false_alarms": 25,
+        "alarm_rate_per_1000": 2.711,
+        "score": -15.0,
+        "score_normalized": 2.832
+      },
+      "event_hits": [
+        "PAYEMS_PEAK_2001"
+      ]
+    },
+    {
+      "rank": 10,
+      "name": "F10",
+      "combination": "CASCADE_HUBER_THEN_CUSUM",
+      "parameters": {
+        "window": 60,
+        "lead_w": 6,
+        "huber_thr": 8.0,
+        "cusum_thr": 15.0,
+        "vol_thr": null
+      },
+      "formula": "CASCADE_HUBER_THEN_CUSUM(window=60, lead=6, huber_thr=8.0, cusum_thr=15.0)",
+      "metrics": {
+        "hits": 1,
+        "events_total": 20,
+        "hit_rate_pct": 5.0,
+        "false_alarms": 25,
+        "alarm_rate_per_1000": 2.711,
+        "score": -15.0,
+        "score_normalized": 2.832
+      },
+      "event_hits": [
+        "PAYEMS_PEAK_2001"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+name: Run Reverse Mining
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reverse-mining-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run reverse miner
+        run: python -m core.reverse_miner
+
+      - name: Run blind holdout validator
+        run: python -m stress_test.blind_validator
+
+      - name: Show generated results
+        run: |
+          ls -la results
+          head -n 5 results/reverse_mining_leaderboard.csv
+
+      - name: Upload results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reverse-mining-results
+          path: results/
+          if-no-files-found: error
+
+      - name: Commit and push generated results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/
+          if git diff --cached --quiet; then
+            echo "No result changes to commit."
+          else
+            git commit -m "chore(results): refresh reverse-mining outputs [skip ci]"
+            git push origin HEAD:main
+          fi
