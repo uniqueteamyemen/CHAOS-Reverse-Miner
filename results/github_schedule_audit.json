@@ -1,0 +1,20 @@
+{
+  "checked_at_utc": "2026-11-27T17:14:58Z",
+  "repository": "uniqueteamyemen/CHAOS-Reverse-Miner",
+  "workflow": {
+    "id": 431973011,
+    "name": "Run Reverse Mining",
+    "path": ".github/workflows/run_reverse_mining.yml",
+    "state": "active",
+    "schedule_configured": "0 14 * * *",
+    "runs_by_event": {"push": 7, "schedule": 0}
+  },
+  "manual_dispatch": {
+    "supported": true,
+    "run_ids": [46040725289, 46041722512],
+    "first_conclusion": "success"
+  },
+  "diagnosis": "The workflow is active and workflow_dispatch executes the full pipeline, but GitHub's scheduler produced zero schedule events after the first due window (14:00 UTC on 2026-11-27). No repository-side setting explains it; the repository actions permissions are enabled.",
+  "action_taken": "Manual dispatch used to verify the pipeline; the daily cron remains configured and will be re-checked on the next cycle.",
+  "does_not_affect_engine_determinism": true
+}

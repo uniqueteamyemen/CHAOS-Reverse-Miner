@@ -1,0 +1,728 @@
+{
+  "budget": 3,
+  "engine": "chaos_engine-v1.0.0",
+  "generated_at_utc": "2026-11-27T17:29:13+00:00",
+  "runs": [
+    {
+      "alarm_count": 3,
+      "alarm_episodes": [
+        {
+          "end": "2019-02",
+          "months": 3,
+          "peak": {
+            "fusion_z": -0.905,
+            "macro_cusum_down": 1.284,
+            "trend_z": 3.802
+          },
+          "start": "2018-12",
+          "state": "ALARM",
+          "triggers": [
+            "TREND_SLOPE"
+          ]
+        },
+        {
+          "end": "2021-06",
+          "months": 16,
+          "peak": {
+            "fusion_z": 24.009,
+            "macro_cusum_down": 32.813,
+            "trend_z": 19.594
+          },
+          "start": "2020-03",
+          "state": "ALARM",
+          "triggers": [
+            "CROSS_SERIES_MACRO_GATE",
+            "TREND_SLOPE"
+          ]
+        },
+        {
+          "end": "2022-12",
+          "months": 5,
+          "peak": {
+            "fusion_z": -0.007,
+            "macro_cusum_down": 14.495,
+            "trend_z": 0.786
+          },
+          "start": "2022-08",
+          "state": "ALARM",
+          "triggers": [
+            "CROSS_SERIES_MACRO_GATE"
+          ]
+        }
+      ],
+      "crisis_check": "checked_against_registry",
+      "end": "2022-12-01",
+      "false_alarms_per_year": 0.379,
+      "lag": "zero",
+      "months": 96,
+      "release_lag": {},
+      "segment": "2015-2022 (out-of-sample)",
+      "start": "2015-01-01",
+      "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277",
+      "verdict": "PASS",
+      "watch_count": 4,
+      "watch_episodes": [
+        {
+          "end": "2015-03",
+          "months": 1,
+          "peak": {
+            "fusion_z": -1.043,
+            "macro_cusum_down": 1.705,
+            "trend_z": 0.809
+          },
+          "start": "2015-03",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        },
+        {
+          "end": "2015-06",
+          "months": 1,
+          "peak": {
+            "fusion_z": 0.472,
+            "macro_cusum_down": 0.815,
+            "trend_z": 1.349
+          },
+          "start": "2015-06",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        },
+        {
+          "end": "2016-04",
+          "months": 1,
+          "peak": {
+            "fusion_z": -0.078,
+            "macro_cusum_down": 0.885,
+            "trend_z": 1.612
+          },
+          "start": "2016-04",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        },
+        {
+          "end": "2022-04",
+          "months": 1,
+          "peak": {
+            "fusion_z": 0.013,
+            "macro_cusum_down": 13.21,
+            "trend_z": 0.476
+          },
+          "start": "2022-04",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        }
+      ],
+      "years": 7.915
+    },
+    {
+      "alarm_count": 3,
+      "alarm_episodes": [
+        {
+          "end": "2019-03",
+          "months": 3,
+          "peak": {
+            "fusion_z": -0.763,
+            "macro_cusum_down": 1.284,
+            "trend_z": 3.802
+          },
+          "start": "2019-01",
+          "state": "ALARM",
+          "triggers": [
+            "TREND_SLOPE"
+          ]
+        },
+        {
+          "end": "2021-07",
+          "months": 16,
+          "peak": {
+            "fusion_z": 24.004,
+            "macro_cusum_down": 32.813,
+            "trend_z": 19.594
+          },
+          "start": "2020-04",
+          "state": "ALARM",
+          "triggers": [
+            "CROSS_SERIES_MACRO_GATE",
+            "TREND_SLOPE"
+          ]
+        },
+        {
+          "end": "2022-12",
+          "months": 4,
+          "peak": {
+            "fusion_z": -0.007,
+            "macro_cusum_down": 13.693,
+            "trend_z": 0.786
+          },
+          "start": "2022-09",
+          "state": "ALARM",
+          "triggers": [
+            "CROSS_SERIES_MACRO_GATE"
+          ]
+        }
+      ],
+      "crisis_check": "checked_against_registry",
+      "end": "2022-12-01",
+      "false_alarms_per_year": 0.379,
+      "lag": "release-lag",
+      "months": 96,
+      "release_lag": {
+        "ICSA": "7 days 00:00:00",
+        "PAYEMS": "<DateOffset: months=1>",
+        "UNRATE": "<DateOffset: months=1>",
+        "WCOILBRENTEU": "7 days 00:00:00"
+      },
+      "segment": "2015-2022 (out-of-sample)",
+      "start": "2015-01-01",
+      "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277",
+      "verdict": "PASS",
+      "watch_count": 2,
+      "watch_episodes": [
+        {
+          "end": "2015-04",
+          "months": 2,
+          "peak": {
+            "fusion_z": 0.063,
+            "macro_cusum_down": 1.705,
+            "trend_z": 1.038
+          },
+          "start": "2015-03",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        },
+        {
+          "end": "2016-04",
+          "months": 1,
+          "peak": {
+            "fusion_z": -0.368,
+            "macro_cusum_down": 0.723,
+            "trend_z": 1.278
+          },
+          "start": "2016-04",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        }
+      ],
+      "years": 7.915
+    },
+    {
+      "alarm_count": 1,
+      "alarm_episodes": [
+        {
+          "end": "2024-02",
+          "months": 14,
+          "peak": {
+            "fusion_z": -0.01,
+            "macro_cusum_down": 14.502,
+            "trend_z": 0.648
+          },
+          "start": "2023-01",
+          "state": "ALARM",
+          "triggers": [
+            "CROSS_SERIES_MACRO_GATE"
+          ]
+        }
+      ],
+      "crisis_check": "not_applicable: no registered crisis anchor inside the replay period",
+      "end": "2026-10-01",
+      "false_alarms_per_year": 0.267,
+      "lag": "zero",
+      "months": 45,
+      "release_lag": {},
+      "segment": "2023-2026 (protocol period)",
+      "start": "2023-01-01",
+      "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277",
+      "verdict": "PASS",
+      "watch_count": 3,
+      "watch_episodes": [
+        {
+          "end": "2025-02",
+          "months": 1,
+          "peak": {
+            "fusion_z": 0.03,
+            "macro_cusum_down": 14.06,
+            "trend_z": -0.247
+          },
+          "start": "2025-02",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        },
+        {
+          "end": "2026-05",
+          "months": 2,
+          "peak": {
+            "fusion_z": 0.668,
+            "macro_cusum_down": 10.351,
+            "trend_z": -0.886
+          },
+          "start": "2026-04",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        },
+        {
+          "end": "2026-08",
+          "months": 1,
+          "peak": {
+            "fusion_z": 1.056,
+            "macro_cusum_down": 7.498,
+            "trend_z": -1.58
+          },
+          "start": "2026-08",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        }
+      ],
+      "years": 3.748
+    },
+    {
+      "alarm_count": 1,
+      "alarm_episodes": [
+        {
+          "end": "2024-03",
+          "months": 15,
+          "peak": {
+            "fusion_z": -0.011,
+            "macro_cusum_down": 14.502,
+            "trend_z": 0.729
+          },
+          "start": "2023-01",
+          "state": "ALARM",
+          "triggers": [
+            "CROSS_SERIES_MACRO_GATE"
+          ]
+        }
+      ],
+      "crisis_check": "not_applicable: no registered crisis anchor inside the replay period",
+      "end": "2026-10-01",
+      "false_alarms_per_year": 0.267,
+      "lag": "release-lag",
+      "months": 45,
+      "release_lag": {
+        "ICSA": "7 days 00:00:00",
+        "PAYEMS": "<DateOffset: months=1>",
+        "UNRATE": "<DateOffset: months=1>",
+        "WCOILBRENTEU": "7 days 00:00:00"
+      },
+      "segment": "2023-2026 (protocol period)",
+      "start": "2023-01-01",
+      "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277",
+      "verdict": "PASS",
+      "watch_count": 2,
+      "watch_episodes": [
+        {
+          "end": "2026-06",
+          "months": 3,
+          "peak": {
+            "fusion_z": 0.803,
+            "macro_cusum_down": 11.598,
+            "trend_z": -0.886
+          },
+          "start": "2026-04",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        },
+        {
+          "end": "2026-08",
+          "months": 1,
+          "peak": {
+            "fusion_z": 0.652,
+            "macro_cusum_down": 9.4,
+            "trend_z": -1.696
+          },
+          "start": "2026-08",
+          "state": "WATCH",
+          "triggers": [
+            "C4_relay:WCOILBRENTEU"
+          ]
+        }
+      ],
+      "years": 3.748
+    }
+  ],
+  "segments": [
+    {
+      "name": "2015-2022 (out-of-sample)",
+      "runs": [
+        {
+          "alarm_count": 3,
+          "alarm_episodes": [
+            {
+              "end": "2019-02",
+              "months": 3,
+              "peak": {
+                "fusion_z": -0.905,
+                "macro_cusum_down": 1.284,
+                "trend_z": 3.802
+              },
+              "start": "2018-12",
+              "state": "ALARM",
+              "triggers": [
+                "TREND_SLOPE"
+              ]
+            },
+            {
+              "end": "2021-06",
+              "months": 16,
+              "peak": {
+                "fusion_z": 24.009,
+                "macro_cusum_down": 32.813,
+                "trend_z": 19.594
+              },
+              "start": "2020-03",
+              "state": "ALARM",
+              "triggers": [
+                "CROSS_SERIES_MACRO_GATE",
+                "TREND_SLOPE"
+              ]
+            },
+            {
+              "end": "2022-12",
+              "months": 5,
+              "peak": {
+                "fusion_z": -0.007,
+                "macro_cusum_down": 14.495,
+                "trend_z": 0.786
+              },
+              "start": "2022-08",
+              "state": "ALARM",
+              "triggers": [
+                "CROSS_SERIES_MACRO_GATE"
+              ]
+            }
+          ],
+          "crisis_check": "checked_against_registry",
+          "end": "2022-12-01",
+          "false_alarms_per_year": 0.379,
+          "lag": "zero",
+          "months": 96,
+          "release_lag": {},
+          "segment": "2015-2022 (out-of-sample)",
+          "start": "2015-01-01",
+          "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277",
+          "verdict": "PASS",
+          "watch_count": 4,
+          "watch_episodes": [
+            {
+              "end": "2015-03",
+              "months": 1,
+              "peak": {
+                "fusion_z": -1.043,
+                "macro_cusum_down": 1.705,
+                "trend_z": 0.809
+              },
+              "start": "2015-03",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            },
+            {
+              "end": "2015-06",
+              "months": 1,
+              "peak": {
+                "fusion_z": 0.472,
+                "macro_cusum_down": 0.815,
+                "trend_z": 1.349
+              },
+              "start": "2015-06",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            },
+            {
+              "end": "2016-04",
+              "months": 1,
+              "peak": {
+                "fusion_z": -0.078,
+                "macro_cusum_down": 0.885,
+                "trend_z": 1.612
+              },
+              "start": "2016-04",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            },
+            {
+              "end": "2022-04",
+              "months": 1,
+              "peak": {
+                "fusion_z": 0.013,
+                "macro_cusum_down": 13.21,
+                "trend_z": 0.476
+              },
+              "start": "2022-04",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            }
+          ],
+          "years": 7.915
+        },
+        {
+          "alarm_count": 3,
+          "alarm_episodes": [
+            {
+              "end": "2019-03",
+              "months": 3,
+              "peak": {
+                "fusion_z": -0.763,
+                "macro_cusum_down": 1.284,
+                "trend_z": 3.802
+              },
+              "start": "2019-01",
+              "state": "ALARM",
+              "triggers": [
+                "TREND_SLOPE"
+              ]
+            },
+            {
+              "end": "2021-07",
+              "months": 16,
+              "peak": {
+                "fusion_z": 24.004,
+                "macro_cusum_down": 32.813,
+                "trend_z": 19.594
+              },
+              "start": "2020-04",
+              "state": "ALARM",
+              "triggers": [
+                "CROSS_SERIES_MACRO_GATE",
+                "TREND_SLOPE"
+              ]
+            },
+            {
+              "end": "2022-12",
+              "months": 4,
+              "peak": {
+                "fusion_z": -0.007,
+                "macro_cusum_down": 13.693,
+                "trend_z": 0.786
+              },
+              "start": "2022-09",
+              "state": "ALARM",
+              "triggers": [
+                "CROSS_SERIES_MACRO_GATE"
+              ]
+            }
+          ],
+          "crisis_check": "checked_against_registry",
+          "end": "2022-12-01",
+          "false_alarms_per_year": 0.379,
+          "lag": "release-lag",
+          "months": 96,
+          "release_lag": {
+            "ICSA": "7 days 00:00:00",
+            "PAYEMS": "<DateOffset: months=1>",
+            "UNRATE": "<DateOffset: months=1>",
+            "WCOILBRENTEU": "7 days 00:00:00"
+          },
+          "segment": "2015-2022 (out-of-sample)",
+          "start": "2015-01-01",
+          "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277",
+          "verdict": "PASS",
+          "watch_count": 2,
+          "watch_episodes": [
+            {
+              "end": "2015-04",
+              "months": 2,
+              "peak": {
+                "fusion_z": 0.063,
+                "macro_cusum_down": 1.705,
+                "trend_z": 1.038
+              },
+              "start": "2015-03",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            },
+            {
+              "end": "2016-04",
+              "months": 1,
+              "peak": {
+                "fusion_z": -0.368,
+                "macro_cusum_down": 0.723,
+                "trend_z": 1.278
+              },
+              "start": "2016-04",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            }
+          ],
+          "years": 7.915
+        }
+      ]
+    },
+    {
+      "name": "2023-2026 (protocol period)",
+      "runs": [
+        {
+          "alarm_count": 1,
+          "alarm_episodes": [
+            {
+              "end": "2024-02",
+              "months": 14,
+              "peak": {
+                "fusion_z": -0.01,
+                "macro_cusum_down": 14.502,
+                "trend_z": 0.648
+              },
+              "start": "2023-01",
+              "state": "ALARM",
+              "triggers": [
+                "CROSS_SERIES_MACRO_GATE"
+              ]
+            }
+          ],
+          "crisis_check": "not_applicable: no registered crisis anchor inside the replay period",
+          "end": "2026-10-01",
+          "false_alarms_per_year": 0.267,
+          "lag": "zero",
+          "months": 45,
+          "release_lag": {},
+          "segment": "2023-2026 (protocol period)",
+          "start": "2023-01-01",
+          "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277",
+          "verdict": "PASS",
+          "watch_count": 3,
+          "watch_episodes": [
+            {
+              "end": "2025-02",
+              "months": 1,
+              "peak": {
+                "fusion_z": 0.03,
+                "macro_cusum_down": 14.06,
+                "trend_z": -0.247
+              },
+              "start": "2025-02",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            },
+            {
+              "end": "2026-05",
+              "months": 2,
+              "peak": {
+                "fusion_z": 0.668,
+                "macro_cusum_down": 10.351,
+                "trend_z": -0.886
+              },
+              "start": "2026-04",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            },
+            {
+              "end": "2026-08",
+              "months": 1,
+              "peak": {
+                "fusion_z": 1.056,
+                "macro_cusum_down": 7.498,
+                "trend_z": -1.58
+              },
+              "start": "2026-08",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            }
+          ],
+          "years": 3.748
+        },
+        {
+          "alarm_count": 1,
+          "alarm_episodes": [
+            {
+              "end": "2024-03",
+              "months": 15,
+              "peak": {
+                "fusion_z": -0.011,
+                "macro_cusum_down": 14.502,
+                "trend_z": 0.729
+              },
+              "start": "2023-01",
+              "state": "ALARM",
+              "triggers": [
+                "CROSS_SERIES_MACRO_GATE"
+              ]
+            }
+          ],
+          "crisis_check": "not_applicable: no registered crisis anchor inside the replay period",
+          "end": "2026-10-01",
+          "false_alarms_per_year": 0.267,
+          "lag": "release-lag",
+          "months": 45,
+          "release_lag": {
+            "ICSA": "7 days 00:00:00",
+            "PAYEMS": "<DateOffset: months=1>",
+            "UNRATE": "<DateOffset: months=1>",
+            "WCOILBRENTEU": "7 days 00:00:00"
+          },
+          "segment": "2023-2026 (protocol period)",
+          "start": "2023-01-01",
+          "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277",
+          "verdict": "PASS",
+          "watch_count": 2,
+          "watch_episodes": [
+            {
+              "end": "2026-06",
+              "months": 3,
+              "peak": {
+                "fusion_z": 0.803,
+                "macro_cusum_down": 11.598,
+                "trend_z": -0.886
+              },
+              "start": "2026-04",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            },
+            {
+              "end": "2026-08",
+              "months": 1,
+              "peak": {
+                "fusion_z": 0.652,
+                "macro_cusum_down": 9.4,
+                "trend_z": -1.696
+              },
+              "start": "2026-08",
+              "state": "WATCH",
+              "triggers": [
+                "C4_relay:WCOILBRENTEU"
+              ]
+            }
+          ],
+          "years": 3.748
+        }
+      ]
+    }
+  ],
+  "thresholds_sha256": "189ed2ee461fcc49292d3413c0f5d6c124ea8b656415e83911278fea7b6b3277"
+}

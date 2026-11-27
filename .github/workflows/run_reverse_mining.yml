@@ -50,6 +50,9 @@ jobs:
       - name: Run production engine
         run: python -m production.chaos_engine
 
+      - name: Run v1.0 audit
+        run: python -m production.audit_v1
+
       - name: Show generated results
         run: |
           ls -la results

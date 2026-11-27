@@ -187,6 +187,32 @@ rather than a fresh 2023 signal; it is counted once and disclosed in
 `results/live_engine_state.json`. Two consecutive runs produce byte-identical
 JSON (verified by SHA-256).
 
+### 8.1 v1.0 audit (release lag + out-of-sample segments)
+
+Thresholds were not touched. Monthly series are shifted +1 month and weekly +1
+week to simulate FRED publication lag; the decision calendar is unchanged.
+
+| Segment | Lag | ALARM | WATCH | FA/year | Verdict |
+|---|---|---|---|---|---|
+| 2015-2022 (out-of-sample) | zero | 3 | 4 | 0.379 | **PASS** |
+| 2015-2022 | release-lag | 3 | 2 | 0.379 | **PASS** |
+| 2023-2026 (protocol) | zero | 1 | 3 | 0.267 | **PASS** |
+| 2023-2026 | release-lag | 1 | 2 | 0.267 | **PASS** |
+
+The lag audited does not change any verdict; it shifts episode starts by one
+month, as expected. The 2015-2022 segment is out-of-sample for threshold
+selection (all thresholds were fixed before 2005) but not pre-registered for the
+2023-2026 budgets - that is stated in `results/engine_audit_v1.md`.
+
+Two honest weaknesses remain: the 2023-2026 ALARM is a 14-month latched PAYEMS
+CUSUM episode starting at the replay boundary, and 2015-2022 produces a 3-month
+ALARM around 2018-12 that is best described as a borderline false alarm.
+
+**Scheduler status:** the daily cron (`0 14 * * *`) is configured and the
+workflow is active, but GitHub produced **0** `schedule` events after the first
+due window. Manual `workflow_dispatch` runs succeed (`46040725289`). Evidence is
+in `results/github_schedule_audit.json`; the cron is kept for the next cycle.
+
 ## 9. Reproduce locally
 
 ```bash
@@ -234,3 +260,5 @@ upload → commit changed `results/` back to `main` with `[skip ci]`.
 | 2014 cold catch | not achieved - structural, documented |
 | Production engine (pinned thresholds, 3 states) | implemented, deterministic |
 | 2023-2026 paper-trading protocol | PASS (1 alarm, 0.267 FA/year) |
+| Release-lag + 2015-2022 audit | PASS in all four runs, thresholds untouched |
+| GitHub daily schedule | configured, 0 schedule events - under observation |

@@ -230,27 +230,57 @@ def _series_snapshot(
     return snapshot
 
 
-def run() -> dict[str, object]:
+def _apply_release_lag(
+    frames: dict[str, pd.Series], lag: dict[str, object] | None
+) -> dict[str, pd.Series]:
+    """Shift each series forward by its publication lag (index += lag)."""
+    if not lag:
+        return frames
+    shifted: dict[str, pd.Series] = {}
+    for series_id, series in frames.items():
+        offset = lag.get(series_id)
+        if offset is None:
+            shifted[series_id] = series
+        else:
+            shifted[series_id] = pd.Series(series.to_numpy(), index=series.index + offset)
+    return shifted
+
+
+def run(
+    start: str = START,
+    end: str = END,
+    lag: dict[str, object] | None = None,
+    include_snapshot: bool = True,
+) -> dict[str, object]:
     thresholds, thresholds_hash = load_thresholds()
     protocol = json.loads(PROTOCOL_PATH.read_text(encoding="utf-8"))
     frames = data_loader.load_all()
     profiles = data_loader.get_profiles()
 
-    start = pd.Timestamp(START)
-    end = min(pd.Timestamp(END), frames["UNRATE"].index[-1])
-    months = [t for t in frames["UNRATE"].index if start <= t <= end]
+    start_ts = pd.Timestamp(start)
+    end_ts = min(pd.Timestamp(end), frames["UNRATE"].index[-1])
+    decision_dates = [t for t in frames["UNRATE"].index if start_ts <= t <= end_ts]
+    evaluation_frames = _apply_release_lag(frames, lag)
 
-    records = [evaluate_month(frames, profiles, t, thresholds) for t in months]
+    records = [
+        evaluate_month(evaluation_frames, profiles, t, thresholds) for t in decision_dates
+    ]
     episodes = _episodes(records)
 
     alarm_episodes = [e for e in episodes if e["state"] == "ALARM"]
     watch_episodes = [e for e in episodes if e["state"] == "WATCH"]
-    years = (months[-1] - months[0]).days / 365.25 if len(months) > 1 else 0.0
+    years = (
+        (decision_dates[-1] - decision_dates[0]).days / 365.25
+        if len(decision_dates) > 1
+        else 0.0
+    )
     false_alarm_rate = len(alarm_episodes) / years if years else 0.0
     max_alarms = int(protocol["acceptable_alarms_max"])
     budget = float(protocol["false_alarm_budget_per_year"])
     crisis_in_period = [
-        event for event in data_loader.get_events() if start <= pd.Timestamp(event[2]) <= end
+        event
+        for event in data_loader.get_events()
+        if start_ts <= pd.Timestamp(event[2]) <= end_ts
     ]
     crisis_status = (
         "not_applicable: no registered crisis anchor inside the replay period"
@@ -260,7 +290,7 @@ def run() -> dict[str, object]:
     passed = bool(len(alarm_episodes) <= max_alarms and false_alarm_rate <= budget)
 
     fingerprint = data_loader.fingerprint()
-    snapshot = _series_snapshot(frames, profiles, thresholds)
+    snapshot = _series_snapshot(frames, profiles, thresholds) if include_snapshot else None
 
     result: dict[str, object] = {
         "engine": ENGINE_VERSION,
@@ -270,9 +300,9 @@ def run() -> dict[str, object]:
         "protocol": protocol,
         "data_fingerprint": fingerprint,
         "replay": {
-            "start": str(months[0].date()) if months else None,
-            "end": str(months[-1].date()) if months else None,
-            "months": len(months),
+            "start": str(decision_dates[0].date()) if decision_dates else None,
+            "end": str(decision_dates[-1].date()) if decision_dates else None,
+            "months": len(decision_dates),
             "years": round(years, 3),
             "alarm_episodes": alarm_episodes,
             "watch_episodes": watch_episodes,
@@ -283,6 +313,7 @@ def run() -> dict[str, object]:
             "acceptable_alarms_max": max_alarms,
             "crisis_check": crisis_status,
             "verdict": "PASS" if passed else "FAIL",
+            "release_lag": {key: str(value) for key, value in (lag or {}).items()},
         },
         "live_state": snapshot,
     }
