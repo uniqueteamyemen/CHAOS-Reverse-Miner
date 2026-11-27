@@ -1,0 +1,252 @@
+{
+  "combined": {
+    "evaluation": {
+      "alarm_days": 1693,
+      "alarm_days_per_year": 59.0,
+      "catch_count": 9,
+      "catches": [
+        "LTCM_RUSSIA_1998",
+        "DOTCOM_CRASH_2000",
+        "NBER_2007_PEAK",
+        "GFC_LEHMAN_2008",
+        "EURO_DEBT_US_DOWNGRADE_2011",
+        "HY_ENERGY_CRUNCH_2015",
+        "NBER_2020_PEAK",
+        "UKRAINE_OIL_2022",
+        "SVB_BANKING_STRESS_2023"
+      ],
+      "episodes": 276,
+      "episodes_per_year": 9.619,
+      "mean_lead_days": 13.9
+    }
+  },
+  "engine": "CHAOS-Reverse-Miner/c6-hierarchical-radar",
+  "fast_shock": {
+    "config": {
+      "k": 4.0,
+      "layers": [
+        {
+          "feature": "trend_slope_z",
+          "grid": "daily",
+          "layer": "LIQUIDITY",
+          "quantile": 0.95,
+          "series": "T10Y2Y",
+          "sign": -1,
+          "threshold": 2.099815,
+          "train_coverage": 1
+        },
+        {
+          "feature": "ph_up",
+          "grid": "daily",
+          "layer": "CREDIT",
+          "quantile": 0.99,
+          "series": "BAA10Y",
+          "sign": 1,
+          "threshold": 0.148751,
+          "train_coverage": 1
+        },
+        {
+          "feature": "ph_up",
+          "grid": "daily",
+          "layer": "VOLATILITY",
+          "quantile": 0.95,
+          "series": "VIXCLS",
+          "sign": 1,
+          "threshold": 0.162138,
+          "train_coverage": 2
+        },
+        {
+          "feature": "drawdown_norm",
+          "grid": "weekly",
+          "layer": "FIN_CONDITIONS",
+          "quantile": 0.95,
+          "series": "NFCI",
+          "sign": -1,
+          "threshold": 0.0,
+          "train_coverage": 1
+        },
+        {
+          "feature": "ph_up",
+          "grid": "weekly",
+          "layer": "LABOR_UNRATE",
+          "quantile": 0.9999,
+          "series": "UNRATE",
+          "sign": 1,
+          "threshold": 0.758614,
+          "train_coverage": 0
+        },
+        {
+          "feature": "l1_slope_break",
+          "grid": "weekly",
+          "layer": "LABOR_PAYEMS",
+          "quantile": 0.9999,
+          "series": "PAYEMS",
+          "sign": 1,
+          "threshold": 0.329539,
+          "train_coverage": 0
+        },
+        {
+          "feature": "trend_slope_z",
+          "grid": "weekly",
+          "layer": "CLAIMS",
+          "quantile": 0.95,
+          "series": "ICSA",
+          "sign": 1,
+          "threshold": 1.951578,
+          "train_coverage": 2
+        },
+        {
+          "feature": "ph_up",
+          "grid": "weekly",
+          "layer": "OIL",
+          "quantile": 0.9999,
+          "series": "WCOILBRENTEU",
+          "sign": 1,
+          "threshold": 0.432256,
+          "train_coverage": 0
+        }
+      ],
+      "name": "cooldown 10d",
+      "params": {}
+    },
+    "evaluation": {
+      "alarm_days": 415,
+      "alarm_days_per_year": 14.46,
+      "catch_count": 9,
+      "catches": [
+        "LTCM_RUSSIA_1998",
+        "DOTCOM_CRASH_2000",
+        "NBER_2007_PEAK",
+        "GFC_LEHMAN_2008",
+        "EURO_DEBT_US_DOWNGRADE_2011",
+        "HY_ENERGY_CRUNCH_2015",
+        "NBER_2020_PEAK",
+        "UKRAINE_OIL_2022",
+        "SVB_BANKING_STRESS_2023"
+      ],
+      "episodes": 231,
+      "episodes_per_year": 8.051,
+      "mean_lead_days": 11.2
+    },
+    "filters": [
+      {
+        "catch_count": 9,
+        "episodes": 290,
+        "episodes_per_year": 7.904,
+        "mean_lead_days": 15.0,
+        "name": "base weighted>=4, 10d"
+      },
+      {
+        "catch_count": 9,
+        "episodes": 287,
+        "episodes_per_year": 7.822,
+        "mean_lead_days": 11.2,
+        "name": "cooldown 10d"
+      },
+      {
+        "catch_count": 8,
+        "episodes": 290,
+        "episodes_per_year": 7.904,
+        "mean_lead_days": 5.8,
+        "name": "cooldown 20d"
+      },
+      {
+        "catch_count": 8,
+        "episodes": 215,
+        "episodes_per_year": 5.86,
+        "mean_lead_days": 6.8,
+        "name": "cooldown 30d"
+      },
+      {
+        "catch_count": 8,
+        "episodes": 282,
+        "episodes_per_year": 7.686,
+        "mean_lead_days": 16.8,
+        "name": "2-day persistence"
+      },
+      {
+        "catch_count": 8,
+        "episodes": 276,
+        "episodes_per_year": 7.522,
+        "mean_lead_days": 13.0,
+        "name": "2-day persistence + cooldown 10d"
+      },
+      {
+        "catch_count": 7,
+        "episodes": 282,
+        "episodes_per_year": 7.686,
+        "mean_lead_days": 8.4,
+        "name": "2-day persistence + cooldown 20d"
+      },
+      {
+        "catch_count": 8,
+        "episodes": 288,
+        "episodes_per_year": 7.85,
+        "mean_lead_days": 16.9,
+        "name": "weighted>=4.5"
+      },
+      {
+        "catch_count": 7,
+        "episodes": 288,
+        "episodes_per_year": 7.85,
+        "mean_lead_days": 6.6,
+        "name": "weighted>=4.5 + cooldown 20d"
+      },
+      {
+        "catch_count": 8,
+        "episodes": 243,
+        "episodes_per_year": 6.623,
+        "mean_lead_days": 16.8,
+        "name": "weighted>=5.0"
+      },
+      {
+        "catch_count": 6,
+        "episodes": 243,
+        "episodes_per_year": 6.623,
+        "mean_lead_days": 10.2,
+        "name": "weighted>=5.0 + cooldown 20d"
+      },
+      {
+        "catch_count": 8,
+        "episodes": 243,
+        "episodes_per_year": 6.623,
+        "mean_lead_days": 16.8,
+        "name": "weighted>=5.5"
+      },
+      {
+        "catch_count": 6,
+        "episodes": 243,
+        "episodes_per_year": 6.623,
+        "mean_lead_days": 10.2,
+        "name": "weighted>=5.5 + cooldown 20d"
+      }
+    ]
+  },
+  "generated_at_utc": "2026-11-27T19:50:09+00:00",
+  "live": {
+    "as_of": "2026-09-11",
+    "fast_shock": false,
+    "macro_crisis": false,
+    "state": "QUIET"
+  },
+  "macro_crisis": {
+    "evaluation": {
+      "alarm_days": 1367,
+      "alarm_days_per_year": 47.64,
+      "catch_count": 2,
+      "catches": [
+        "GFC_LEHMAN_2008",
+        "SVB_BANKING_STRESS_2023"
+      ],
+      "episodes": 96,
+      "episodes_per_year": 3.346,
+      "mean_lead_days": 19.0
+    },
+    "meta": {
+      "raw_alarm_months": 75,
+      "release_rule": "clear when PAYEMS ph_down < 0.05 and UNRATE trend_z < 0",
+      "released_alarm_months": 63
+    }
+  },
+  "period": "1998-01-01..2026-09-11"
+}

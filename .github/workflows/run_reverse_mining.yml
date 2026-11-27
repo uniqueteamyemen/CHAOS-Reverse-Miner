@@ -59,6 +59,9 @@ jobs:
       - name: Run C5 v2 optimizer
         run: python -m core.c5_v2_optimizer
 
+      - name: Run C6 hierarchical radar
+        run: python -m production.chaos_engine_v2
+
       - name: Show generated results
         run: |
           ls -la results

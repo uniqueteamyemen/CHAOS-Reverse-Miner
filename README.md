@@ -43,7 +43,8 @@ CHAOS-Reverse-Miner/
 │   ├── composite_router.py     # monthly + weekly + C4 relay router, live radar
 │   ├── c4_precursor_miner.py   # windows, calibration, precedence, diagnostics
 │   ├── c5_cross_layer_miner.py # 8-layer backward signature + forward replay
-│   └── c5_v2_optimizer.py      # daily-grid K/weight sweep across nine stations
+│   ├── c5_v2_optimizer.py      # daily-grid K/weight sweep across nine stations
+│   └── chaos_engine_v2.py      # C6 hierarchical radar (MACRO_CRISIS + FAST_SHOCK)
 ├── stress_test/
 │   └── blind_validator.py      # pre-2005 mining, cold test, radar
 ├── production/
@@ -63,7 +64,9 @@ CHAOS-Reverse-Miner/
     ├── c5_cross_layer_report.md
     ├── c5_invariant_signature.json
     ├── c5_v2_optimization_report.md
-    └── c5_v2_best_signature.json
+    ├── c5_v2_best_signature.json
+    ├── c6_hierarchical_radar_report.md
+    └── live_engine_v2_state.json
 ```
 
 ## 3. Data and anchors
@@ -271,6 +274,33 @@ nothing from C5 v2 is promoted into `production/`. The comparison uses all nine
 stations, so it is an **in-sample optimisation**; C5 v1's 1/3 cold result remains
 the out-of-sample reference.
 
+### 8.2.2 C6 - noise filters and the hierarchical radar
+
+**Filter test.** The base daily signature is 9/9 at 13.44 merged alarms/year
+(10-day gap). Re-merging at 20 days gives 7.9/year; cooldown 10 gives 9/9 at
+7.82/year (14 alarm-days/year); cooldown 30 drops to 5.86/year but loses 2015;
+2-day persistence and thresholds 4.5-5.5 lose SVB 2023.
+
+| Filter | Catches | Merged episodes/year | Alarm days/year |
+|---|---|---|---|
+| base, 20-day merge | 9/9 | 7.90 | 93.8 |
+| cooldown 10d (selected FAST_SHOCK) | 9/9 | 7.82 | 14.1 |
+| cooldown 30d | 8/9 (loses 2015) | 5.86 | 5.9 |
+| persistence 2d | 8/9 (loses SVB) | 7.69 | 90.4 |
+
+Part of the 13.44 to 7.82 drop is the **counting change** (20-day merge instead
+of 10), not noise removal; the alarm-days column is the honest raw measure.
+
+**Hierarchical radar** (`production/chaos_engine_v2.py`): `MACRO_CRISIS`
+(v1.0 logic with latch release) and `FAST_SHOCK` (filtered daily signature),
+priority MACRO_CRISIS > FAST_SHOCK > QUIET, replayed causally 1998-2026.
+Combined: 9/9 stations, 9.62 merged episodes/year; the macro layer adds 96
+episodes (3.35/year) and catches 2/9 on its own. Latch release cuts 75 raw
+alarm months to 63. Live state: **QUIET**.
+
+The daily radar is a monitoring tool, not a production alarm: even after
+filtering it runs ~8 fast episodes/year, far above the v1.0 budget.
+
 ## 9. Reproduce locally
 
 ```bash
@@ -286,6 +316,7 @@ python -m production.chaos_engine
 python -m production.audit_v1
 python -m core.c5_cross_layer_miner
 python -m core.c5_v2_optimizer
+python -m production.chaos_engine_v2
 ```
 
 ## 10. CI
@@ -324,4 +355,5 @@ upload → commit changed `results/` back to `main` with `[skip ci]`.
 | Release-lag + 2015-2022 audit | PASS in all four runs, thresholds untouched |
 | C5 eight-layer backward signature | K=6/8, 4-week window; 1/3 cold catches |
 | C5 v2 daily-grid signature | 9/9 stations, 15 d mean lead, 13.44 alarms/year (in-sample) |
+| C6 hierarchical radar | 9/9, 9.62 episodes/year; live QUIET; macro latch release active |
 | GitHub daily schedule | configured, 0 schedule events - under observation |
