@@ -1,0 +1,306 @@
+{
+  "co_fracture": {
+    "at_cutoff": 0,
+    "max_q3": 0,
+    "tension_at_cutoff": 4
+  },
+  "columns": [
+    "S_01",
+    "S_02",
+    "S_03",
+    "S_04",
+    "S_05",
+    "S_06",
+    "S_07",
+    "S_08"
+  ],
+  "cutoff": "2026-09-25",
+  "disclosure": "no asset names, no post-cutoff data, no external events",
+  "engine": "CHAOS-Reverse-Miner/blind-break-detector",
+  "generated_at_utc": "2026-11-27T20:39:56+00:00",
+  "projection": {
+    "as_of": "2026-09-25",
+    "candidates": [
+      {
+        "days_in_break_20d": 0,
+        "days_tension_20d": 20,
+        "direction": "downside break risk",
+        "drawdown_norm": -22.428,
+        "l1_slope_break": 0.002,
+        "score": 3.0,
+        "series": "S_08",
+        "state": "PRE_BREAK_TENSION"
+      },
+      {
+        "days_in_break_20d": 0,
+        "days_tension_20d": 17,
+        "direction": "upside break risk",
+        "drawdown_norm": -14.476,
+        "l1_slope_break": 0.001,
+        "score": 2.7,
+        "series": "S_03",
+        "state": "PRE_BREAK_TENSION"
+      },
+      {
+        "days_in_break_20d": 0,
+        "days_tension_20d": 2,
+        "direction": "upside break risk",
+        "drawdown_norm": 0.0,
+        "l1_slope_break": 0.001,
+        "score": 1.2,
+        "series": "S_02",
+        "state": "PRE_BREAK_TENSION"
+      },
+      {
+        "days_in_break_20d": 0,
+        "days_tension_20d": 1,
+        "direction": "upside break risk",
+        "drawdown_norm": -18.714,
+        "l1_slope_break": 0.001,
+        "score": 1.1,
+        "series": "S_04",
+        "state": "PRE_BREAK_TENSION"
+      }
+    ],
+    "caveat": "structural scenario conditional on pre-cutoff data; not a forecast or a probability",
+    "co_fracture": 0,
+    "co_fracture_20d_change": 0.0,
+    "co_fracture_20d_mean": 0.0,
+    "monthly_outlook": [
+      {
+        "basis": "conditional on the 2026-09-25 stress state and its 20-day slope",
+        "candidate_columns": [
+          "S_08",
+          "S_03",
+          "S_02"
+        ],
+        "month": "October 2026",
+        "structural_regime": "localised stress"
+      },
+      {
+        "basis": "conditional on the 2026-09-25 stress state and its 20-day slope",
+        "candidate_columns": [
+          "S_08",
+          "S_03",
+          "S_02"
+        ],
+        "month": "November 2026",
+        "structural_regime": "localised stress"
+      },
+      {
+        "basis": "conditional on the 2026-09-25 stress state and its 20-day slope",
+        "candidate_columns": [
+          "S_08",
+          "S_03"
+        ],
+        "month": "December 2026",
+        "structural_regime": "localised stress"
+      }
+    ],
+    "regime": "localised stress",
+    "tension": 4
+  },
+  "q3_2026": {
+    "end": "2026-09-25",
+    "episodes": {
+      "S_01": [
+        {
+          "days": 1,
+          "end": "2026-08-04",
+          "start": "2026-08-04",
+          "state": "PRE_BREAK_TENSION"
+        }
+      ],
+      "S_02": [
+        {
+          "days": 2,
+          "end": "2026-09-25",
+          "start": "2026-09-24",
+          "state": "PRE_BREAK_TENSION"
+        }
+      ],
+      "S_03": [
+        {
+          "days": 7,
+          "end": "2026-07-10",
+          "start": "2026-07-01",
+          "state": "PRE_BREAK_TENSION"
+        },
+        {
+          "days": 5,
+          "end": "2026-07-28",
+          "start": "2026-07-22",
+          "state": "PRE_BREAK_TENSION"
+        },
+        {
+          "days": 18,
+          "end": "2026-09-25",
+          "start": "2026-08-27",
+          "state": "PRE_BREAK_TENSION"
+        }
+      ],
+      "S_04": [
+        {
+          "days": 1,
+          "end": "2026-09-25",
+          "start": "2026-09-25",
+          "state": "PRE_BREAK_TENSION"
+        }
+      ],
+      "S_05": [],
+      "S_06": [],
+      "S_07": [
+        {
+          "days": 11,
+          "end": "2026-07-15",
+          "start": "2026-07-01",
+          "state": "PRE_BREAK_TENSION"
+        },
+        {
+          "days": 5,
+          "end": "2026-07-28",
+          "start": "2026-07-22",
+          "state": "PRE_BREAK_TENSION"
+        },
+        {
+          "days": 1,
+          "end": "2026-08-12",
+          "start": "2026-08-12",
+          "state": "PRE_BREAK_TENSION"
+        }
+      ],
+      "S_08": [
+        {
+          "days": 48,
+          "end": "2026-09-25",
+          "start": "2026-07-22",
+          "state": "PRE_BREAK_TENSION"
+        }
+      ]
+    },
+    "start": "2026-07-01"
+  },
+  "rows": 7233,
+  "snapshot": {
+    "S_01": {
+      "down_core": false,
+      "drawdown": -55.5801,
+      "drawdown_norm": -0.972,
+      "l1_slope_break": 0.001,
+      "ph_down": 30.4019,
+      "ph_up": 90.1168,
+      "q_dd": -12.051,
+      "q_down": 181.6487,
+      "q_slope": 0.006,
+      "q_up": 272.3256,
+      "state": "NORMAL",
+      "trend_slope_z": 0.018,
+      "up_core": false
+    },
+    "S_02": {
+      "down_core": false,
+      "drawdown": 0.0,
+      "drawdown_norm": 0.0,
+      "l1_slope_break": 0.001,
+      "ph_down": 0.0031,
+      "ph_up": 0.1168,
+      "q_dd": -19.218,
+      "q_down": 0.2044,
+      "q_slope": 0.005,
+      "q_up": 0.2015,
+      "state": "PRE_BREAK_TENSION",
+      "trend_slope_z": 1.106,
+      "up_core": false
+    },
+    "S_03": {
+      "down_core": false,
+      "drawdown": -0.38,
+      "drawdown_norm": -14.476,
+      "l1_slope_break": 0.001,
+      "ph_down": 0.0,
+      "ph_up": 0.1511,
+      "q_dd": -16.127,
+      "q_down": 0.1297,
+      "q_slope": 0.004,
+      "q_up": 0.1127,
+      "state": "PRE_BREAK_TENSION",
+      "trend_slope_z": -0.062,
+      "up_core": false
+    },
+    "S_04": {
+      "down_core": false,
+      "drawdown": -0.39,
+      "drawdown_norm": -18.714,
+      "l1_slope_break": 0.001,
+      "ph_down": 0.0,
+      "ph_up": 0.0917,
+      "q_dd": -27.87,
+      "q_down": 0.1062,
+      "q_slope": 0.007,
+      "q_up": 0.0793,
+      "state": "PRE_BREAK_TENSION",
+      "trend_slope_z": -0.672,
+      "up_core": false
+    },
+    "S_05": {
+      "down_core": false,
+      "drawdown": -16.18,
+      "drawdown_norm": -10.43,
+      "l1_slope_break": 0.001,
+      "ph_down": 1.3086,
+      "ph_up": 0.5379,
+      "q_dd": -16.519,
+      "q_down": 11.7748,
+      "q_slope": 0.004,
+      "q_up": 5.1818,
+      "state": "NORMAL",
+      "trend_slope_z": -0.133,
+      "up_core": false
+    },
+    "S_06": {
+      "down_core": false,
+      "drawdown": -0.06,
+      "drawdown_norm": -17.258,
+      "l1_slope_break": 0.003,
+      "ph_down": 0.0036,
+      "ph_up": 0.0056,
+      "q_dd": -70.998,
+      "q_down": 0.017,
+      "q_slope": 0.051,
+      "q_up": 0.0142,
+      "state": "NORMAL",
+      "trend_slope_z": -0.004,
+      "up_core": false
+    },
+    "S_07": {
+      "down_core": false,
+      "drawdown": -37000.0,
+      "drawdown_norm": -8.578,
+      "l1_slope_break": 0.004,
+      "ph_down": 1570.7542,
+      "ph_up": 2807.1622,
+      "q_dd": -13.817,
+      "q_down": 20504.8686,
+      "q_slope": 0.01,
+      "q_up": 18070.5789,
+      "state": "NORMAL",
+      "trend_slope_z": 0.099,
+      "up_core": false
+    },
+    "S_08": {
+      "down_core": false,
+      "drawdown": -0.4,
+      "drawdown_norm": -22.428,
+      "l1_slope_break": 0.002,
+      "ph_down": 0.0,
+      "ph_up": 0.0323,
+      "q_dd": -21.982,
+      "q_down": 0.0921,
+      "q_slope": 0.015,
+      "q_up": 0.1166,
+      "state": "PRE_BREAK_TENSION",
+      "trend_slope_z": -1.671,
+      "up_core": false
+    }
+  }
+}

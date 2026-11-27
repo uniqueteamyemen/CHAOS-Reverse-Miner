@@ -44,7 +44,10 @@ CHAOS-Reverse-Miner/
 │   ├── c4_precursor_miner.py   # windows, calibration, precedence, diagnostics
 │   ├── c5_cross_layer_miner.py # 8-layer backward signature + forward replay
 │   ├── c5_v2_optimizer.py      # daily-grid K/weight sweep across nine stations
-│   └── chaos_engine_v2.py      # C6 hierarchical radar (MACRO_CRISIS + FAST_SHOCK)
+│   ├── chaos_engine_v2.py      # C6 hierarchical radar (MACRO_CRISIS + FAST_SHOCK)
+│   └── blind_break_detector.py # anonymous S_01..S_08 structural-break detector
+├── scripts/
+│   └── build_blind_matrix.py   # strict-cutoff anonymised matrix builder
 ├── stress_test/
 │   └── blind_validator.py      # pre-2005 mining, cold test, radar
 ├── production/
@@ -66,7 +69,9 @@ CHAOS-Reverse-Miner/
     ├── c5_v2_optimization_report.md
     ├── c5_v2_best_signature.json
     ├── c6_hierarchical_radar_report.md
-    └── live_engine_v2_state.json
+    ├── live_engine_v2_state.json
+    ├── blind_test_2026_09_25_report.md
+    └── blind_test_2026_09_25.json
 ```
 
 ## 3. Data and anchors
@@ -301,6 +306,29 @@ alarm months to 63. Live state: **QUIET**.
 The daily radar is a monitoring tool, not a production alarm: even after
 filtering it runs ~8 fast episodes/year, far above the v1.0 budget.
 
+### 8.2.3 Strict blind structural-break test (cutoff 2026-09-25)
+
+Two isolated stages:
+
+1. `scripts/build_blind_matrix.py` downloads eight series **capped at the source**
+   (`coed=2026-09-25` / Stooq `d2`), anonymises them to `S_01..S_08`, applies
+   causal forward-fill only (monthly +1 month, weekly Thursday-after), and writes
+   `data/blind_matrix_2026_09_25.csv` (7,233 rows, 1999-01-06 to 2026-09-25).
+   The matrix is committed so CI always has the exact frozen input.
+2. `core/blind_break_detector.py` reads **only** that matrix. It never sees an
+   asset name, a weight, or any post-cutoff value, and its outputs contain no
+   asset identity.
+
+Detector: Page-Hinkley up/down, 60-day OLS slope z, 252-day volatility-normalised
+drawdown, L1 slope break, all thresholded by **causal rolling 3-year quantiles**
+(Q98/Q95 up, Q02 down) from 2004.
+
+State at the 2026-09-25 close: **Blind Co-Fracture Index 0**, four columns in
+`PRE_BREAK_TENSION` (`S_02`, `S_03`, `S_04`, `S_08`). Q3 2026 shows persistent
+tension in `S_08` (48 days) and repeated short tension bursts in `S_03` and
+`S_07`. The conditional October-December reading stays "localised stress" with
+`S_08`, `S_03`, `S_02` as candidates - explicitly not a probability forecast.
+
 ## 9. Reproduce locally
 
 ```bash
@@ -317,6 +345,8 @@ python -m production.audit_v1
 python -m core.c5_cross_layer_miner
 python -m core.c5_v2_optimizer
 python -m production.chaos_engine_v2
+python scripts/build_blind_matrix.py
+python -m core.blind_break_detector
 ```
 
 ## 10. CI
@@ -356,4 +386,5 @@ upload → commit changed `results/` back to `main` with `[skip ci]`.
 | C5 eight-layer backward signature | K=6/8, 4-week window; 1/3 cold catches |
 | C5 v2 daily-grid signature | 9/9 stations, 15 d mean lead, 13.44 alarms/year (in-sample) |
 | C6 hierarchical radar | 9/9, 9.62 episodes/year; live QUIET; macro latch release active |
+| Blind structural-break test | frozen 2026-09-25 matrix; co-fracture 0, 4 tension columns |
 | GitHub daily schedule | configured, 0 schedule events - under observation |

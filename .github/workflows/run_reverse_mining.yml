@@ -62,6 +62,12 @@ jobs:
       - name: Run C6 hierarchical radar
         run: python -m production.chaos_engine_v2
 
+      - name: Build blind matrix (cutoff 2026-09-25)
+        run: python scripts/build_blind_matrix.py
+
+      - name: Run blind structural-break detector
+        run: python -m core.blind_break_detector
+
       - name: Show generated results
         run: |
           ls -la results
