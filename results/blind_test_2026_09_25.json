@@ -17,7 +17,7 @@
   "cutoff": "2026-09-25",
   "disclosure": "no asset names, no post-cutoff data, no external events",
   "engine": "CHAOS-Reverse-Miner/blind-break-detector",
-  "generated_at_utc": "2026-11-27T21:08:21+00:00",
+  "generated_at_utc": "2026-11-27T21:11:46+00:00",
   "projection": {
     "as_of": "2026-09-25",
     "candidates": [
