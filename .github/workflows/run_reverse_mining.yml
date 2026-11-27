@@ -56,6 +56,9 @@ jobs:
       - name: Run C5 cross-layer miner
         run: python -m core.c5_cross_layer_miner
 
+      - name: Run C5 v2 optimizer
+        run: python -m core.c5_v2_optimizer
+
       - name: Show generated results
         run: |
           ls -la results

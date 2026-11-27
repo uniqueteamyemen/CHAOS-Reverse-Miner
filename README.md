@@ -42,7 +42,8 @@ CHAOS-Reverse-Miner/
 │   ├── reverse_miner.py        # 4,572-formula policy grid
 │   ├── composite_router.py     # monthly + weekly + C4 relay router, live radar
 │   ├── c4_precursor_miner.py   # windows, calibration, precedence, diagnostics
-│   └── c5_cross_layer_miner.py # 8-layer backward signature + forward replay
+│   ├── c5_cross_layer_miner.py # 8-layer backward signature + forward replay
+│   └── c5_v2_optimizer.py      # daily-grid K/weight sweep across nine stations
 ├── stress_test/
 │   └── blind_validator.py      # pre-2005 mining, cold test, radar
 ├── production/
@@ -60,7 +61,9 @@ CHAOS-Reverse-Miner/
     ├── paper_trading_2023_2026.md
     ├── live_engine_state.json
     ├── c5_cross_layer_report.md
-    └── c5_invariant_signature.json
+    ├── c5_invariant_signature.json
+    ├── c5_v2_optimization_report.md
+    └── c5_v2_best_signature.json
 ```
 
 ## 3. Data and anchors
@@ -246,6 +249,28 @@ the cold segment.
 2023-11-28 (ICE licence), so the historical credit layer is `BAA10Y` (from 1986)
 as a documented proxy; HY OAS is kept for live cross-check only.
 
+### 8.2.1 C5 v2 - daily grid and signature sweep
+
+Fast layers (`T10Y2Y`, `BAA10Y`, `VIXCLS`) were moved to their true daily grid
+(no Friday bucket, no +1 week lag); slow layers keep release lags. Thresholds
+stay pre-2005 quantiles. Nine stations: 1998, 2000, 2007, 2008, 2011, 2015,
+2020, 2022, SVB 2023.
+
+**Result: the daily grid catches 9/9**, including `EURO_DEBT_2011` (-18 days)
+and `SVB_2023` (same day), at 13.44 quiet alarms/year. The lower-noise variant
+(7/9, 9.5 alarms/year) misses both 2015 and SVB, so it is reported as an
+alternative, not recommended.
+
+| Formula | Catches | Mean lead | Alarms/year |
+|---|---|---|---|
+| weighted >= 4, 10-day window | **9/9** | 15.0 d | 13.44 |
+| K=6 of 8, 10-day window | 7/9 | 18.3 d | 9.51 |
+
+The daily grid fixes the v1.0 misses but costs ~13x the production noise budget;
+nothing from C5 v2 is promoted into `production/`. The comparison uses all nine
+stations, so it is an **in-sample optimisation**; C5 v1's 1/3 cold result remains
+the out-of-sample reference.
+
 ## 9. Reproduce locally
 
 ```bash
@@ -260,6 +285,7 @@ python -m stress_test.blind_validator
 python -m production.chaos_engine
 python -m production.audit_v1
 python -m core.c5_cross_layer_miner
+python -m core.c5_v2_optimizer
 ```
 
 ## 10. CI
@@ -297,4 +323,5 @@ upload → commit changed `results/` back to `main` with `[skip ci]`.
 | 2023-2026 paper-trading protocol | PASS (1 alarm, 0.267 FA/year) |
 | Release-lag + 2015-2022 audit | PASS in all four runs, thresholds untouched |
 | C5 eight-layer backward signature | K=6/8, 4-week window; 1/3 cold catches |
+| C5 v2 daily-grid signature | 9/9 stations, 15 d mean lead, 13.44 alarms/year (in-sample) |
 | GitHub daily schedule | configured, 0 schedule events - under observation |

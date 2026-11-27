@@ -309,6 +309,10 @@ def sahm_floor_displacement(series: pd.Series, frequency: str) -> np.ndarray:
         short = levels.rolling(3, min_periods=3).mean()
         floor = short.rolling(12, min_periods=12).min()
         return (short - floor).to_numpy()
+    if frequency == "daily":
+        short = levels.rolling(5, min_periods=5).mean()
+        floor = short.rolling(252, min_periods=252).min()
+        return (short / floor.replace(0.0, np.nan) - 1.0).to_numpy()
     short = levels.rolling(4, min_periods=4).mean()
     floor = short.rolling(52, min_periods=52).min()
     return (short / floor.replace(0.0, np.nan) - 1.0).to_numpy()
@@ -336,7 +340,7 @@ def page_hinkley(values: np.ndarray, alpha: float = PH_ALPHA) -> tuple[np.ndarra
 
 def drawdown_features(series: pd.Series, frequency: str) -> tuple[np.ndarray, np.ndarray]:
     levels = series.to_numpy(dtype=float)
-    window = 12 if frequency == "monthly" else 52
+    window = 12 if frequency == "monthly" else (252 if frequency == "daily" else 52)
     frame = pd.Series(levels)
     peak = frame.rolling(window, min_periods=window).max()
     drawdown = (frame - peak) / peak.replace(0.0, np.nan)
@@ -349,7 +353,7 @@ def drawdown_features(series: pd.Series, frequency: str) -> tuple[np.ndarray, np
 
 def l1_slope_break(values: np.ndarray, frequency: str) -> np.ndarray:
     """|slope_recent - slope_prior| / MAD(diff) over the trailing window."""
-    window = 24 if frequency == "monthly" else 44
+    window = 24 if frequency == "monthly" else (252 if frequency == "daily" else 44)
     half = max(3, window // 2)
     recent = _rolling_slope(values, half)
     prior = _rolling_slope(values, half)
@@ -370,7 +374,12 @@ def build_series_state(series: pd.Series, frequency: str, transform: str) -> Sta
     drawdown, drawdown_norm = drawdown[1:], drawdown_norm[1:]
     ph_up, ph_down = page_hinkley(conditioned)
     slope_break = l1_slope_break(conditioned, frequency)
-    trend = trend_slope_z(series, 6 if frequency == "monthly" else 12, 24)[1:]
+    if frequency == "daily":
+        trend = trend_slope_z(series, 60, 252)[1:]
+    elif frequency == "monthly":
+        trend = trend_slope_z(series, 6, 24)[1:]
+    else:
+        trend = trend_slope_z(series, 12, 24)[1:]
     return StateVector(
         series_id=str(series.name),
         frequency=frequency,

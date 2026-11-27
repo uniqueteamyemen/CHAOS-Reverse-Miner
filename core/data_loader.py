@@ -195,6 +195,34 @@ C5_COLD_ANCHORS: list[tuple[str, str]] = [
     ("SVB_BANKING_STRESS_2023", "2023-03-10"),
 ]
 
+#: C5 v2: nine stations used for the daily-grid formula comparison.  The first
+#: two are the backward-training anchors; the rest are evaluation stations.
+C5_V2_ANCHORS: list[tuple[str, str]] = [
+    ("LTCM_RUSSIA_1998", "1998-08-17"),
+    ("DOTCOM_CRASH_2000", "2000-03-24"),
+    ("NBER_2007_PEAK", "2007-12-01"),
+    ("GFC_LEHMAN_2008", "2008-09-15"),
+    ("EURO_DEBT_US_DOWNGRADE_2011", "2011-08-05"),
+    ("HY_ENERGY_CRUNCH_2015", "2015-12-11"),
+    ("NBER_2020_PEAK", "2020-02-01"),
+    ("UKRAINE_OIL_2022", "2022-02-24"),
+    ("SVB_BANKING_STRESS_2023", "2023-03-10"),
+]
+
+C5_FAST_LAYERS: tuple[str, ...] = ("T10Y2Y", "BAA10Y", "VIXCLS")
+
+#: Backward-derived weights: layers that led the 1998/2000 breaks get 1.5.
+C5_V2_WEIGHTS: dict[str, float] = {
+    "T10Y2Y": 1.5,
+    "BAA10Y": 1.0,
+    "VIXCLS": 1.5,
+    "NFCI": 1.5,
+    "UNRATE": 1.0,
+    "PAYEMS": 1.0,
+    "ICSA": 1.5,
+    "WCOILBRENTEU": 1.5,
+}
+
 
 def load_c5_series(force_refresh: bool = False) -> dict[str, pd.Series]:
     """Download/parse the four C5 layers from FRED (official CSV endpoint)."""

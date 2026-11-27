@@ -1,0 +1,419 @@
+{
+  "balanced_alternative": {
+    "anchors": [
+      {
+        "alarm_date": "1998-07-28",
+        "anchor": "LTCM_RUSSIA_1998",
+        "anchor_date": "1998-08-17",
+        "caught": true,
+        "lead_days": 20
+      },
+      {
+        "alarm_date": "2000-03-06",
+        "anchor": "DOTCOM_CRASH_2000",
+        "anchor_date": "2000-03-24",
+        "caught": true,
+        "lead_days": 18
+      },
+      {
+        "alarm_date": "2007-11-12",
+        "anchor": "NBER_2007_PEAK",
+        "anchor_date": "2007-12-01",
+        "caught": true,
+        "lead_days": 19
+      },
+      {
+        "alarm_date": "2008-08-26",
+        "anchor": "GFC_LEHMAN_2008",
+        "anchor_date": "2008-09-15",
+        "caught": true,
+        "lead_days": 20
+      },
+      {
+        "alarm_date": "2011-07-18",
+        "anchor": "EURO_DEBT_US_DOWNGRADE_2011",
+        "anchor_date": "2011-08-05",
+        "caught": true,
+        "lead_days": 18
+      },
+      {
+        "alarm_date": null,
+        "anchor": "HY_ENERGY_CRUNCH_2015",
+        "anchor_date": "2015-12-11",
+        "caught": false,
+        "lead_days": null
+      },
+      {
+        "alarm_date": "2020-01-13",
+        "anchor": "NBER_2020_PEAK",
+        "anchor_date": "2020-02-01",
+        "caught": true,
+        "lead_days": 19
+      },
+      {
+        "alarm_date": "2022-02-10",
+        "anchor": "UKRAINE_OIL_2022",
+        "anchor_date": "2022-02-24",
+        "caught": true,
+        "lead_days": 14
+      },
+      {
+        "alarm_date": null,
+        "anchor": "SVB_BANKING_STRESS_2023",
+        "anchor_date": "2023-03-10",
+        "caught": false,
+        "lead_days": null
+      }
+    ],
+    "catch_count": 7,
+    "false_alarms_per_year": 9.512,
+    "k": 6,
+    "mean_lead_days": 18.3,
+    "missed": [
+      "HY_ENERGY_CRUNCH_2015",
+      "SVB_BANKING_STRESS_2023"
+    ],
+    "name": "K=6 of 8, 10d window",
+    "window_days": 10
+  },
+  "best": {
+    "anchors": [
+      {
+        "alarm_date": "1998-07-28",
+        "anchor": "LTCM_RUSSIA_1998",
+        "anchor_date": "1998-08-17",
+        "caught": true,
+        "lead_days": 20
+      },
+      {
+        "alarm_date": "2000-03-06",
+        "anchor": "DOTCOM_CRASH_2000",
+        "anchor_date": "2000-03-24",
+        "caught": true,
+        "lead_days": 18
+      },
+      {
+        "alarm_date": "2007-11-12",
+        "anchor": "NBER_2007_PEAK",
+        "anchor_date": "2007-12-01",
+        "caught": true,
+        "lead_days": 19
+      },
+      {
+        "alarm_date": "2008-08-26",
+        "anchor": "GFC_LEHMAN_2008",
+        "anchor_date": "2008-09-15",
+        "caught": true,
+        "lead_days": 20
+      },
+      {
+        "alarm_date": "2011-07-18",
+        "anchor": "EURO_DEBT_US_DOWNGRADE_2011",
+        "anchor_date": "2011-08-05",
+        "caught": true,
+        "lead_days": 18
+      },
+      {
+        "alarm_date": "2015-12-10",
+        "anchor": "HY_ENERGY_CRUNCH_2015",
+        "anchor_date": "2015-12-11",
+        "caught": true,
+        "lead_days": 1
+      },
+      {
+        "alarm_date": "2020-01-13",
+        "anchor": "NBER_2020_PEAK",
+        "anchor_date": "2020-02-01",
+        "caught": true,
+        "lead_days": 19
+      },
+      {
+        "alarm_date": "2022-02-04",
+        "anchor": "UKRAINE_OIL_2022",
+        "anchor_date": "2022-02-24",
+        "caught": true,
+        "lead_days": 20
+      },
+      {
+        "alarm_date": "2023-03-10",
+        "anchor": "SVB_BANKING_STRESS_2023",
+        "anchor_date": "2023-03-10",
+        "caught": true,
+        "lead_days": 0
+      }
+    ],
+    "catch_count": 9,
+    "false_alarms": 493,
+    "false_alarms_per_year": 13.437,
+    "k": 4,
+    "kind": "weighted",
+    "mean_lead_days": 15.0,
+    "name": "weighted >= 4, 10d window",
+    "selection_rule": "maximise catches, tie-break lower false alarms per year",
+    "weights": {
+      "CLAIMS": 1.5,
+      "CREDIT": 1.0,
+      "FIN_CONDITIONS": 1.5,
+      "LABOR_PAYEMS": 1.0,
+      "LABOR_UNRATE": 1.0,
+      "LIQUIDITY": 1.5,
+      "OIL": 1.5,
+      "VOLATILITY": 1.5
+    },
+    "window_days": 10
+  },
+  "disclosure": "all nine stations used for selection; in-sample optimisation",
+  "engine": "CHAOS-Reverse-Miner/c5-v2-optimizer",
+  "generated_at_utc": "2026-11-27T19:20:55+00:00",
+  "grid": "1990-01-02..2026-09-11 business days",
+  "layers": [
+    {
+      "feature": "trend_slope_z",
+      "grid": "daily",
+      "layer": "LIQUIDITY",
+      "quantile": 0.95,
+      "series": "T10Y2Y",
+      "sign": -1,
+      "threshold": 2.099815,
+      "train_coverage": 1
+    },
+    {
+      "feature": "ph_up",
+      "grid": "daily",
+      "layer": "CREDIT",
+      "quantile": 0.99,
+      "series": "BAA10Y",
+      "sign": 1,
+      "threshold": 0.148751,
+      "train_coverage": 1
+    },
+    {
+      "feature": "ph_up",
+      "grid": "daily",
+      "layer": "VOLATILITY",
+      "quantile": 0.95,
+      "series": "VIXCLS",
+      "sign": 1,
+      "threshold": 0.162138,
+      "train_coverage": 2
+    },
+    {
+      "feature": "drawdown_norm",
+      "grid": "weekly",
+      "layer": "FIN_CONDITIONS",
+      "quantile": 0.95,
+      "series": "NFCI",
+      "sign": -1,
+      "threshold": 0.0,
+      "train_coverage": 1
+    },
+    {
+      "feature": "ph_up",
+      "grid": "weekly",
+      "layer": "LABOR_UNRATE",
+      "quantile": 0.9999,
+      "series": "UNRATE",
+      "sign": 1,
+      "threshold": 0.758614,
+      "train_coverage": 0
+    },
+    {
+      "feature": "l1_slope_break",
+      "grid": "weekly",
+      "layer": "LABOR_PAYEMS",
+      "quantile": 0.9999,
+      "series": "PAYEMS",
+      "sign": 1,
+      "threshold": 0.329539,
+      "train_coverage": 0
+    },
+    {
+      "feature": "trend_slope_z",
+      "grid": "weekly",
+      "layer": "CLAIMS",
+      "quantile": 0.95,
+      "series": "ICSA",
+      "sign": 1,
+      "threshold": 1.951578,
+      "train_coverage": 2
+    },
+    {
+      "feature": "ph_up",
+      "grid": "weekly",
+      "layer": "OIL",
+      "quantile": 0.9999,
+      "series": "WCOILBRENTEU",
+      "sign": 1,
+      "threshold": 0.432256,
+      "train_coverage": 0
+    }
+  ],
+  "live": {
+    "as_of": "2026-09-11",
+    "formula": "weighted >= 4, 10d window",
+    "state": "QUIET",
+    "window_days": 10
+  },
+  "variants": [
+    {
+      "catch_count": 9,
+      "false_alarms": 493,
+      "false_alarms_per_year": 13.437,
+      "k": 4,
+      "kind": "weighted",
+      "mean_lead_days": 15.0,
+      "name": "weighted >= 4, 10d window",
+      "window_days": 10
+    },
+    {
+      "catch_count": 9,
+      "false_alarms": 497,
+      "false_alarms_per_year": 13.546,
+      "k": 3,
+      "kind": "unweighted",
+      "mean_lead_days": 15.0,
+      "name": "K=3 of 8, 10d window",
+      "window_days": 10
+    },
+    {
+      "catch_count": 9,
+      "false_alarms": 550,
+      "false_alarms_per_year": 14.99,
+      "k": 5,
+      "kind": "weighted",
+      "mean_lead_days": 15.8,
+      "name": "weighted >= 5, 20d window",
+      "window_days": 20
+    },
+    {
+      "catch_count": 9,
+      "false_alarms": 551,
+      "false_alarms_per_year": 15.018,
+      "k": 4,
+      "kind": "unweighted",
+      "mean_lead_days": 15.8,
+      "name": "K=4 of 8, 20d window",
+      "window_days": 20
+    },
+    {
+      "catch_count": 9,
+      "false_alarms": 586,
+      "false_alarms_per_year": 15.972,
+      "k": 3,
+      "kind": "weighted",
+      "mean_lead_days": 16.9,
+      "name": "weighted >= 3, 10d window",
+      "window_days": 10
+    },
+    {
+      "catch_count": 9,
+      "false_alarms": 646,
+      "false_alarms_per_year": 17.607,
+      "k": 4,
+      "kind": "weighted",
+      "mean_lead_days": 16.9,
+      "name": "weighted >= 4, 20d window",
+      "window_days": 20
+    },
+    {
+      "catch_count": 9,
+      "false_alarms": 651,
+      "false_alarms_per_year": 17.743,
+      "k": 3,
+      "kind": "unweighted",
+      "mean_lead_days": 16.9,
+      "name": "K=3 of 8, 20d window",
+      "window_days": 20
+    },
+    {
+      "catch_count": 9,
+      "false_alarms": 750,
+      "false_alarms_per_year": 20.442,
+      "k": 3,
+      "kind": "weighted",
+      "mean_lead_days": 17.0,
+      "name": "weighted >= 3, 20d window",
+      "window_days": 20
+    },
+    {
+      "catch_count": 8,
+      "false_alarms": 416,
+      "false_alarms_per_year": 11.338,
+      "k": 6,
+      "kind": "weighted",
+      "mean_lead_days": 16.8,
+      "name": "weighted >= 6, 10d window",
+      "window_days": 10
+    },
+    {
+      "catch_count": 8,
+      "false_alarms": 420,
+      "false_alarms_per_year": 11.447,
+      "k": 5,
+      "kind": "weighted",
+      "mean_lead_days": 16.8,
+      "name": "weighted >= 5, 10d window",
+      "window_days": 10
+    },
+    {
+      "catch_count": 8,
+      "false_alarms": 421,
+      "false_alarms_per_year": 11.475,
+      "k": 4,
+      "kind": "unweighted",
+      "mean_lead_days": 16.8,
+      "name": "K=4 of 8, 10d window",
+      "window_days": 10
+    },
+    {
+      "catch_count": 8,
+      "false_alarms": 547,
+      "false_alarms_per_year": 14.909,
+      "k": 6,
+      "kind": "weighted",
+      "mean_lead_days": 17.8,
+      "name": "weighted >= 6, 20d window",
+      "window_days": 20
+    },
+    {
+      "catch_count": 7,
+      "false_alarms": 349,
+      "false_alarms_per_year": 9.512,
+      "k": 6,
+      "kind": "unweighted",
+      "mean_lead_days": 18.3,
+      "name": "K=6 of 8, 10d window",
+      "window_days": 10
+    },
+    {
+      "catch_count": 7,
+      "false_alarms": 383,
+      "false_alarms_per_year": 10.439,
+      "k": 5,
+      "kind": "unweighted",
+      "mean_lead_days": 18.3,
+      "name": "K=5 of 8, 10d window",
+      "window_days": 10
+    },
+    {
+      "catch_count": 7,
+      "false_alarms": 459,
+      "false_alarms_per_year": 12.51,
+      "k": 6,
+      "kind": "unweighted",
+      "mean_lead_days": 19.1,
+      "name": "K=6 of 8, 20d window",
+      "window_days": 20
+    },
+    {
+      "catch_count": 7,
+      "false_alarms": 502,
+      "false_alarms_per_year": 13.682,
+      "k": 5,
+      "kind": "unweighted",
+      "mean_lead_days": 19.1,
+      "name": "K=5 of 8, 20d window",
+      "window_days": 20
+    }
+  ]
+}
