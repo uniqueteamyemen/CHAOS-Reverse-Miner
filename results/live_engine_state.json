@@ -96,6 +96,7 @@
     "false_alarm_budget_per_year": 1.0,
     "false_alarms_per_year": 0.267,
     "months": 45,
+    "release_lag": {},
     "start": "2023-01-01",
     "verdict": "PASS",
     "watch_count": 3,
