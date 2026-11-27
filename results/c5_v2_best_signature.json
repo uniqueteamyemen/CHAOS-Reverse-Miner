@@ -164,7 +164,7 @@
   },
   "disclosure": "all nine stations used for selection; in-sample optimisation",
   "engine": "CHAOS-Reverse-Miner/c5-v2-optimizer",
-  "generated_at_utc": "2026-11-27T21:11:43+00:00",
+  "generated_at_utc": "2026-11-27T21:27:37+00:00",
   "grid": "1990-01-02..2026-09-11 business days",
   "layers": [
     {
