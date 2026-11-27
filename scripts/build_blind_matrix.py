@@ -28,6 +28,7 @@ FRED_START = "1998-01-01"
 
 HEADERS = {"User-Agent": "CHAOS-Reverse-Miner/blind-builder (research; urllib)"}
 COLUMNS = [f"S_{i:02d}" for i in range(1, 9)]
+_FRED_OK: bool | None = None
 
 
 def _get(url: str, attempts: int = 3, timeout: int = 60) -> bytes | None:
@@ -45,14 +46,21 @@ def _get(url: str, attempts: int = 3, timeout: int = 60) -> bytes | None:
 def fred_series(series_id: str) -> pd.Series | None:
     """Download a FRED series capped at the cutoff, then parse.
 
-    Falls back to the local cache (``data/<id>.csv``) when FRED is unreachable;
-    the cache is sliced to the cutoff before any calculation.
+    Falls back only to the local cache of the *same* series; it never substitutes
+    a different economic variable.
     """
+    global _FRED_OK
     url = (
         "https://fred.stlouisfed.org/graph/fredgraph.csv"
         f"?id={series_id}&cosd={FRED_START}&coed={CUTOFF}"
     )
-    payload = _get(url)
+    payload = None
+    if _FRED_OK is not False:
+        payload = _get(url, attempts=2, timeout=45)
+        if payload is None:
+            _FRED_OK = False
+        else:
+            _FRED_OK = True
     if payload is None:
         cache = DATA_DIR / f"{series_id}.csv"
         if cache.exists():
@@ -165,6 +173,8 @@ def main() -> int:
             and existing["date"].max() <= pd.Timestamp(CUTOFF)
             and existing["date"].min() >= pd.Timestamp(START)
             and existing.drop(columns=["date"]).notna().all().all()
+            and float(existing["S_02"].iloc[-1]) > 1000
+            and float(existing["S_08"].iloc[-1]) > 20
         )
         if ok:
             print(
@@ -174,16 +184,15 @@ def main() -> int:
             return 0
         print("[blind] existing matrix invalid; rebuilding")
 
-    # S_01: equity index - Stooq primary, Yahoo then FRED fallback.
+    # S_01: equity index - Stooq ^spx, then Yahoo ^GSPC only.
     s01 = stooq_series("^spx")
     if s01 is None or len(s01) < 1000:
         s01 = yahoo_series("%5EGSPC")
     if s01 is None or len(s01) < 1000:
-        s01 = fred_series("NASDAQCOM")
-    if s01 is None:
+        print("[blind] FAILED: S_01 requires Stooq ^spx or Yahoo ^GSPC")
         return _keep_existing(path)
 
-    # S_02: rate series - primary source then Yahoo / FRED fallback.
+    # S_02: gold - primary source, then Yahoo GC=F only (never a bond yield).
     s02 = None
     payload = _get("https://crystalballmarkets.com", attempts=1)
     if payload:
@@ -199,20 +208,25 @@ def main() -> int:
                 s02 = s02[s02.index <= pd.Timestamp(CUTOFF)]
         except Exception:
             s02 = None
+    if s02 is None or len(s02) < 1000 or float(s02.iloc[-1]) <= 1000:
+        s02 = yahoo_series("GC%3DF")
     if s02 is None or len(s02) < 1000:
-        s02 = yahoo_series("%5ETNX")
-    if s02 is None or len(s02) < 1000:
-        s02 = fred_series("DGS10")
-    if s02 is None:
+        print("[blind] FAILED: S_02 requires the rate feed or Yahoo GC=F")
+        return _keep_existing(path)
+
+    s08 = fred_series("DCOILBRENTEU")
+    if s08 is None or len(s08) < 1000:
+        s08 = yahoo_series("BZ%3DF")
+    if s08 is None or len(s08) < 1000:
+        print("[blind] FAILED: S_08 requires FRED DCOILBRENTEU or Yahoo BZ=F")
         return _keep_existing(path)
 
     specs = {
-        "S_03": (fred_series("T10Y2Y"), "daily"),
-        "S_04": (fred_series("BAA10Y"), "daily"),
-        "S_05": (fred_series("VIXCLS"), "daily"),
+        "S_03": (fred_series("VIXCLS"), "daily"),
+        "S_04": (fred_series("T10Y2Y"), "daily"),
+        "S_05": (fred_series("BAA10Y"), "daily"),
         "S_06": (fred_series("NFCI"), "weekly"),
         "S_07": (fred_series("ICSA"), "weekly"),
-        "S_08": (fred_series("UNRATE"), "monthly"),
     }
 
     columns: dict[str, pd.Series] = {}
@@ -225,6 +239,7 @@ def main() -> int:
 
     columns["S_01"] = s01.reindex(matrix_index, method="ffill")
     columns["S_02"] = s02.reindex(matrix_index, method="ffill")
+    columns["S_08"] = s08.reindex(matrix_index, method="ffill")
 
     out = pd.DataFrame({"date": matrix_index})
     for name in ("S_01", "S_02", "S_03", "S_04", "S_05", "S_06", "S_07", "S_08"):
@@ -239,6 +254,18 @@ def main() -> int:
         return 1
     if out["date"].min() < pd.Timestamp(START):
         out = out[out["date"] >= pd.Timestamp(START)].reset_index(drop=True)
+
+    # Hard identity assertions: gold must look like gold, oil like oil.
+    s02_last = float(out["S_02"].iloc[-1])
+    s08_last = float(out["S_08"].iloc[-1])
+    s02_median = float(out["S_02"].median())
+    s08_median = float(out["S_08"].median())
+    if s02_last <= 1000 or s02_median <= 200:
+        print(f"[blind] FAILED assertion S_02 looks like gold? last={s02_last} median={s02_median}")
+        return 1
+    if s08_last <= 20 or s08_median <= 10:
+        print(f"[blind] FAILED assertion S_08 looks like oil? last={s08_last} median={s08_median}")
+        return 1
 
     out.to_csv(path, index=False)
     print(
