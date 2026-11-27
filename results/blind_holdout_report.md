@@ -1,6 +1,6 @@
 # Blind Holdout Report - CHAOS-Reverse-Miner v2.0
 
-Generated: `2026-11-27T19:51:42+00:00`
+Generated: `2026-11-27T20:42:41+00:00`
 
 Every number below is computed by `python -m stress_test.blind_validator` from
 the raw FRED bytes fingerprinted in section 2. Nothing is estimated.

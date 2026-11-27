@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-27T19:51:24+00:00",
+  "generated_at_utc": "2026-11-27T20:42:07+00:00",
   "engine": "CHAOS-Reverse-Miner/composite_router-v3.0",
   "monthly_specialist": {
     "resonance_formula": "CROSS_SERIES_MACRO_GATE(window=fast, lead=long, huber_thr=4.0, cusum_thr=4.0, cusum_slack=0.5, resonance<=2mo)",
@@ -26,6 +26,17 @@
     "false_alarms": 35
   },
   "c4_relay": {
+    "ICSA:+1": {
+      "features": [
+        "sahm_floor_displacement"
+      ],
+      "thresholds": [
+        0.358678
+      ],
+      "cold_hits": 1,
+      "cold_events": 1,
+      "cold_fa": 8
+    },
     "WCOILBRENTEU:+1": {
       "features": [
         "ph_up",
@@ -40,17 +51,6 @@
       "cold_hits": 1,
       "cold_events": 1,
       "cold_fa": 20
-    },
-    "ICSA:+1": {
-      "features": [
-        "sahm_floor_displacement"
-      ],
-      "thresholds": [
-        0.358678
-      ],
-      "cold_hits": 1,
-      "cold_events": 1,
-      "cold_fa": 8
     }
   }
 }
