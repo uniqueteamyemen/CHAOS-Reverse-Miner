@@ -176,12 +176,48 @@ def _snapshot(
             "l1_slope_break": round(float(f["l1_slope_break"].loc[date]), 3),
             "q_up": round(float(diag["q_up"].loc[date]), 4),
             "q_down": round(float(diag["q_down"].loc[date]), 4),
+            "q_trend": round(float(diag["q_trend"].loc[date]), 3),
             "q_dd": round(float(diag["q_dd"].loc[date]), 3),
             "q_slope": round(float(diag["q_slope"].loc[date]), 3),
             "up_core": bool(diag["up_core"].loc[date]),
             "down_core": bool(diag["down_core"].loc[date]),
         }
     return snapshot
+
+
+def _safe_ratio(value: object, threshold: object) -> float:
+    """Value/threshold with safe handling of zero, NaN and signs."""
+    try:
+        numerator = float(value)
+        denominator = float(threshold)
+    except (TypeError, ValueError):
+        return 0.0
+    if not np.isfinite(numerator) or not np.isfinite(denominator) or abs(denominator) < 1e-12:
+        return 0.0
+    return numerator / denominator
+
+
+def direction_from_snapshot(info: dict[str, object]) -> tuple[str, float, float]:
+    """Compare relative upward vs downward pressure against causal thresholds.
+
+    ``drawdown_norm`` and its threshold are both negative, so their ratio is
+    positive and approaches 1.0 as the drawdown reaches the break quantile.
+    """
+    up_pressure = max(
+        _safe_ratio(info["ph_up"], info["q_up"]),
+        _safe_ratio(info["trend_slope_z"], info["q_trend"]),
+    )
+    down_pressure = max(
+        _safe_ratio(info["ph_down"], info["q_down"]),
+        _safe_ratio(info["drawdown_norm"], info["q_dd"]),
+        _safe_ratio(info["l1_slope_break"], info["q_slope"]),
+    )
+    if down_pressure > up_pressure:
+        return "downside break risk", up_pressure, down_pressure
+    if up_pressure > down_pressure:
+        return "upside break risk", up_pressure, down_pressure
+    fallback = "downside break risk" if info["state"] == "DOWNWARD_BREAK" else "upside break risk"
+    return fallback, up_pressure, down_pressure
 
 
 def _projection(
@@ -202,6 +238,7 @@ def _projection(
         info = snapshot[column]
         days_in_break = int(states[column].loc[recent].isin(["UPWARD_BREAK", "DOWNWARD_BREAK"]).sum())
         days_tension = int((states[column].loc[recent] == "PRE_BREAK_TENSION").sum())
+        up_pressure, down_pressure = float("nan"), float("nan")
         if info["state"] == "UPWARD_BREAK":
             direction = "upside continuation"
             score = 3 + days_in_break / 10
@@ -209,11 +246,7 @@ def _projection(
             direction = "downside continuation"
             score = 3 + days_in_break / 10
         elif info["state"] == "PRE_BREAK_TENSION" or days_tension >= 5:
-            down_pressure = (
-                float(info["drawdown_norm"]) <= float(info["q_dd"])
-                or float(info["l1_slope_break"]) >= float(info["q_slope"])
-            )
-            direction = "downside break risk" if down_pressure else "upside break risk"
+            direction, up_pressure, down_pressure = direction_from_snapshot(info)
             score = 1 + days_tension / 10
         else:
             continue
@@ -225,6 +258,8 @@ def _projection(
                 "score": round(score, 2),
                 "days_in_break_20d": days_in_break,
                 "days_tension_20d": days_tension,
+                "up_pressure": round(up_pressure, 3) if np.isfinite(up_pressure) else None,
+                "down_pressure": round(down_pressure, 3) if np.isfinite(down_pressure) else None,
                 "drawdown_norm": info["drawdown_norm"],
                 "l1_slope_break": info["l1_slope_break"],
             }

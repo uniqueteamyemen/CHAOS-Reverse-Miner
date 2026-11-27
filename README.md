@@ -326,10 +326,13 @@ drawdown, L1 slope break, all thresholded by **causal rolling 3-year quantiles**
 (Q98/Q95 up, Q02 down) from 2004.
 
 State at the 2026-09-25 close: **Blind Co-Fracture Index 0**, two columns in
-`PRE_BREAK_TENSION` (`S_04`, `S_05`). Q3 2026 shows sustained tension in `S_04`
-(18 consecutive days to 25 September) and a long July stress window in `S_02`.
-The conditional October-December reading stays "localised stress" with `S_04`
-and `S_05` as the main candidates - explicitly not a probability forecast.
+`PRE_BREAK_TENSION` (`S_04`, `S_05`). Direction is decided by relative pressure
+(`max(ph_up/q_up, trend/q_trend)` versus the downward equivalents), so `S_08`
+reads as **downside break risk** with upward pressure 0.335 and downward
+pressure 0.951. Q3 2026 shows sustained tension in `S_04` (18 consecutive days
+to 25 September) and a long July stress window in `S_02`. The conditional
+October-December reading stays "localised stress" with `S_04`, `S_08` and `S_05`
+as candidates - explicitly not a probability forecast.
 
 ## 9. Reproduce locally
 

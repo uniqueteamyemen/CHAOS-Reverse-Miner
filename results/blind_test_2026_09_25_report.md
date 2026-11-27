@@ -49,7 +49,7 @@ Regime at the cutoff: **localised stress**
 | Column | State | Direction | Break days (20d) | Tension days (20d) |
 |---|---|---|---|---|
 | S_04 | PRE_BREAK_TENSION | upside break risk | 0 | 17 |
-| S_08 | NORMAL | upside break risk | 0 | 5 |
+| S_08 | NORMAL | downside break risk | 0 | 5 |
 | S_05 | PRE_BREAK_TENSION | upside break risk | 0 | 1 |
 
 | Month | Structural regime | Candidate columns |
