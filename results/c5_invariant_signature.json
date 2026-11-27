@@ -183,7 +183,7 @@
     "- The **credit layer did not fire** in the 2015 window; the catch came from financial conditions and oil. The credit layer therefore did not add information for this episode.",
     "- False alarms: 22 episodes in 21.69 years (1.014/year). This is comparable to the v1.0 budget but was not pre-registered for C5."
   ],
-  "generated_at_utc": "2026-11-27T19:23:58+00:00",
+  "generated_at_utc": "2026-11-27T19:52:13+00:00",
   "layers": [
     {
       "feature": "trend_slope_z",
