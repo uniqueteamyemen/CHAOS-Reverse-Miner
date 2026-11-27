@@ -1,0 +1,261 @@
+{
+  "backward_order": [
+    {
+      "anchors_fired": 1,
+      "feature": "drawdown_norm",
+      "layer": "OIL",
+      "mean_offset_weeks": -7.0,
+      "quantile": 0.95,
+      "series": "WCOILBRENTEU",
+      "threshold": 9.529612
+    },
+    {
+      "anchors_fired": 2,
+      "feature": "trend_slope_z",
+      "layer": "CLAIMS",
+      "mean_offset_weeks": -5.5,
+      "quantile": 0.95,
+      "series": "ICSA",
+      "threshold": 1.951578
+    },
+    {
+      "anchors_fired": 1,
+      "feature": "trend_slope_z",
+      "layer": "LIQUIDITY",
+      "mean_offset_weeks": -4.0,
+      "quantile": 0.95,
+      "series": "T10Y2Y",
+      "threshold": 2.758293
+    },
+    {
+      "anchors_fired": 1,
+      "feature": "ph_up",
+      "layer": "VOLATILITY",
+      "mean_offset_weeks": 0.0,
+      "quantile": 0.995,
+      "series": "VIXCLS",
+      "threshold": 0.488298
+    },
+    {
+      "anchors_fired": 2,
+      "feature": "drawdown_norm",
+      "layer": "FIN_CONDITIONS",
+      "mean_offset_weeks": 1.0,
+      "quantile": 0.95,
+      "series": "NFCI",
+      "threshold": 0.0
+    },
+    {
+      "anchors_fired": 2,
+      "feature": "l1_slope_break",
+      "layer": "CREDIT",
+      "mean_offset_weeks": 1.5,
+      "quantile": 0.95,
+      "series": "BAA10Y",
+      "threshold": 0.101577
+    },
+    {
+      "anchors_fired": 0,
+      "feature": "ph_up",
+      "layer": "LABOR_UNRATE",
+      "mean_offset_weeks": null,
+      "quantile": 0.995,
+      "series": "UNRATE",
+      "threshold": 0.748436
+    },
+    {
+      "anchors_fired": 0,
+      "feature": "ph_down",
+      "layer": "LABOR_PAYEMS",
+      "mean_offset_weeks": null,
+      "quantile": 0.995,
+      "series": "PAYEMS",
+      "threshold": 0.012506
+    }
+  ],
+  "cascade": {
+    "k": 6,
+    "quiet_rate_per_year": 0.401,
+    "train_coverage": 2,
+    "window_weeks": 4
+  },
+  "data_notes": {
+    "credit_layer": "BAA10Y proxy; BAMLH0A0HYM2 truncated to 3y by FRED",
+    "grid": "1990-01-12..2026-09-11 weekly Fridays"
+  },
+  "engine": "CHAOS-Reverse-Miner/c5-cross-layer-miner",
+  "forward": {
+    "anchors": [
+      {
+        "alarm_date": null,
+        "anchor": "EURO_DEBT_US_DOWNGRADE_2011",
+        "anchor_date": "2011-08-05",
+        "caught": false,
+        "layers_fired": [
+          "VOLATILITY",
+          "FIN_CONDITIONS",
+          "CLAIMS"
+        ],
+        "max_layers_in_window": 5,
+        "steps_before": null
+      },
+      {
+        "alarm_date": "2015-10-02",
+        "anchor": "HY_ENERGY_CRUNCH_2015",
+        "anchor_date": "2015-12-11",
+        "caught": true,
+        "layers_fired": [
+          "FIN_CONDITIONS",
+          "OIL"
+        ],
+        "max_layers_in_window": 6,
+        "steps_before": -10
+      },
+      {
+        "alarm_date": null,
+        "anchor": "SVB_BANKING_STRESS_2023",
+        "anchor_date": "2023-03-10",
+        "caught": false,
+        "layers_fired": [],
+        "max_layers_in_window": 0,
+        "steps_before": null
+      }
+    ],
+    "catches": 1,
+    "episodes": [
+      "2005-02-04",
+      "2005-04-22",
+      "2005-09-30",
+      "2008-09-12",
+      "2008-11-07",
+      "2009-01-02",
+      "2009-02-27",
+      "2009-04-24",
+      "2009-06-19",
+      "2009-08-14",
+      "2009-10-09",
+      "2010-03-26",
+      "2011-08-26",
+      "2012-06-01",
+      "2014-10-10",
+      "2014-12-12",
+      "2015-02-06",
+      "2015-08-07",
+      "2015-10-02",
+      "2016-01-29",
+      "2020-03-06",
+      "2020-05-01",
+      "2020-06-26",
+      "2020-08-21",
+      "2021-12-10"
+    ],
+    "false_alarms": [
+      "2005-02-04",
+      "2005-04-22",
+      "2005-09-30",
+      "2008-09-12",
+      "2008-11-07",
+      "2009-01-02",
+      "2009-02-27",
+      "2009-04-24",
+      "2009-06-19",
+      "2009-08-14",
+      "2009-10-09",
+      "2010-03-26",
+      "2012-06-01",
+      "2014-10-10",
+      "2014-12-12",
+      "2015-02-06",
+      "2015-08-07",
+      "2020-03-06",
+      "2020-05-01",
+      "2020-06-26",
+      "2020-08-21",
+      "2021-12-10"
+    ],
+    "false_alarms_per_year": 1.014,
+    "years": 21.69
+  },
+  "forward_verdict": [
+    "- **EURO_DEBT_US_DOWNGRADE_2011**: missed. Peak simultaneous layers in the 4-week window was 5/8 (needed 6); layers active: VOLATILITY, FIN_CONDITIONS, CLAIMS.",
+    "- **HY_ENERGY_CRUNCH_2015**: caught on 2015-10-02 (-10 weeks before the anchor). Layers active in the window: FIN_CONDITIONS, OIL.",
+    "- **SVB_BANKING_STRESS_2023**: missed. Peak simultaneous layers in the 4-week window was 0/8 (needed 6); layers active: none.",
+    "- The **credit layer did not fire** in the 2015 window; the catch came from financial conditions and oil. The credit layer therefore did not add information for this episode.",
+    "- False alarms: 22 episodes in 21.69 years (1.014/year). This is comparable to the v1.0 budget but was not pre-registered for C5."
+  ],
+  "generated_at_utc": "2026-11-27T18:20:56+00:00",
+  "layers": [
+    {
+      "feature": "trend_slope_z",
+      "layer": "LIQUIDITY",
+      "quantile": 0.95,
+      "series": "T10Y2Y",
+      "sign": -1,
+      "threshold": 2.758293
+    },
+    {
+      "feature": "l1_slope_break",
+      "layer": "CREDIT",
+      "quantile": 0.95,
+      "series": "BAA10Y",
+      "sign": 1,
+      "threshold": 0.101577
+    },
+    {
+      "feature": "ph_up",
+      "layer": "VOLATILITY",
+      "quantile": 0.995,
+      "series": "VIXCLS",
+      "sign": 1,
+      "threshold": 0.488298
+    },
+    {
+      "feature": "drawdown_norm",
+      "layer": "FIN_CONDITIONS",
+      "quantile": 0.95,
+      "series": "NFCI",
+      "sign": -1,
+      "threshold": 0.0
+    },
+    {
+      "feature": "ph_up",
+      "layer": "LABOR_UNRATE",
+      "quantile": 0.995,
+      "series": "UNRATE",
+      "sign": 1,
+      "threshold": 0.748436
+    },
+    {
+      "feature": "ph_down",
+      "layer": "LABOR_PAYEMS",
+      "quantile": 0.995,
+      "series": "PAYEMS",
+      "sign": 1,
+      "threshold": 0.012506
+    },
+    {
+      "feature": "trend_slope_z",
+      "layer": "CLAIMS",
+      "quantile": 0.95,
+      "series": "ICSA",
+      "sign": 1,
+      "threshold": 1.951578
+    },
+    {
+      "feature": "drawdown_norm",
+      "layer": "OIL",
+      "quantile": 0.95,
+      "series": "WCOILBRENTEU",
+      "sign": -1,
+      "threshold": 9.529612
+    }
+  ],
+  "live": {
+    "as_of": "2026-09-11",
+    "cascade_threshold_k": 6,
+    "cascade_window_weeks": 4,
+    "layers_firing": [],
+    "layers_total": 8,
+    "state": "QUIET"
+  }
+}

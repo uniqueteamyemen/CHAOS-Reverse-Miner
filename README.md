@@ -41,7 +41,8 @@ CHAOS-Reverse-Miner/
 │   ├── detectors.py            # detectors + C4 StateVector features
 │   ├── reverse_miner.py        # 4,572-formula policy grid
 │   ├── composite_router.py     # monthly + weekly + C4 relay router, live radar
-│   └── c4_precursor_miner.py   # windows, calibration, precedence, diagnostics
+│   ├── c4_precursor_miner.py   # windows, calibration, precedence, diagnostics
+│   └── c5_cross_layer_miner.py # 8-layer backward signature + forward replay
 ├── stress_test/
 │   └── blind_validator.py      # pre-2005 mining, cold test, radar
 ├── production/
@@ -57,7 +58,9 @@ CHAOS-Reverse-Miner/
     ├── c4_pre_event_windows.csv
     ├── paper_trading_protocol.json
     ├── paper_trading_2023_2026.md
-    └── live_engine_state.json
+    ├── live_engine_state.json
+    ├── c5_cross_layer_report.md
+    └── c5_invariant_signature.json
 ```
 
 ## 3. Data and anchors
@@ -213,6 +216,36 @@ workflow is active, but GitHub produced **0** `schedule` events after the first
 due window. Manual `workflow_dispatch` runs succeed (`46040725289`). Evidence is
 in `results/github_schedule_audit.json`; the cron is kept for the next cycle.
 
+## 8.2 Cycle C5 - cross-layer reverse engineering (8 layers)
+
+Four new FRED layers - `T10Y2Y` (liquidity), `BAA10Y` (credit proxy), `VIXCLS`
+(volatility), `NFCI` (financial conditions) - are aggregated causally to Friday
+close and joined with the four existing series.
+
+**Backward (pre-2005 anchors only):** LTCM 1998 and Dotcom 2000. One feature and
+one pre-2005 quantile per layer are chosen backwards; the minimal K-of-N cascade
+that covers both anchors is **K=6 of 8 inside a 4-week window** (pre-2005 quiet
+rate 0.401/year). Layer order from the backward map: OIL -7w, CLAIMS -5.5w,
+LIQUIDITY -4w, VOLATILITY 0w, FIN_CONDITIONS +1w, CREDIT +1.5w; labor layers did
+not fire on these two anchors.
+
+**Forward cold replay (2005-2026, zero lookahead):** **1/3** anchors caught.
+
+| Anchor | Result | Peak layers in 4w | Layers active |
+|---|---|---|---|
+| EURO_DEBT_2011 | miss | 5/8 (needed 6) | VOLATILITY, FIN_CONDITIONS, CLAIMS |
+| HY_ENERGY_2015 | **hit** (-10w) | 6/8 | FIN_CONDITIONS, OIL |
+| SVB_2023 | miss | 0/8 | none |
+
+False alarms: 22 over 21.69 years (1.014/year). The credit layer did **not** fire
+in the 2015 window; financial conditions and oil carried it. SVB produced no
+layer breach at all under the pre-2005 thresholds. No threshold was re-tuned on
+the cold segment.
+
+**Data caveat:** FRED's official endpoint returns `BAMLH0A0HYM2` only from
+2023-11-28 (ICE licence), so the historical credit layer is `BAA10Y` (from 1986)
+as a documented proxy; HY OAS is kept for live cross-check only.
+
 ## 9. Reproduce locally
 
 ```bash
@@ -225,6 +258,8 @@ python -m core.composite_router
 python -m core.c4_precursor_miner
 python -m stress_test.blind_validator
 python -m production.chaos_engine
+python -m production.audit_v1
+python -m core.c5_cross_layer_miner
 ```
 
 ## 10. CI
@@ -261,4 +296,5 @@ upload → commit changed `results/` back to `main` with `[skip ci]`.
 | Production engine (pinned thresholds, 3 states) | implemented, deterministic |
 | 2023-2026 paper-trading protocol | PASS (1 alarm, 0.267 FA/year) |
 | Release-lag + 2015-2022 audit | PASS in all four runs, thresholds untouched |
+| C5 eight-layer backward signature | K=6/8, 4-week window; 1/3 cold catches |
 | GitHub daily schedule | configured, 0 schedule events - under observation |

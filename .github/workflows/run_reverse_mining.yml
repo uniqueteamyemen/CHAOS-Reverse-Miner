@@ -53,6 +53,9 @@ jobs:
       - name: Run v1.0 audit
         run: python -m production.audit_v1
 
+      - name: Run C5 cross-layer miner
+        run: python -m core.c5_cross_layer_miner
+
       - name: Show generated results
         run: |
           ls -la results

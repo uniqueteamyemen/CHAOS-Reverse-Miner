@@ -146,6 +146,114 @@ def get_lead_policies() -> dict[str, dict[str, int]]:
     return {name: dict(mapping) for name, mapping in LEAD_POLICIES.items()}
 
 
+# --------------------------------------------------------------------------- #
+# Cycle C5: liquidity / credit / volatility / financial-conditions layers
+# --------------------------------------------------------------------------- #
+#: Kept separate from ``SERIES_CATALOG`` so v1.0 panels and thresholds are never
+#: affected by the C5 expansion.
+C5_SERIES: dict[str, str] = {
+    "T10Y2Y": "10-Year minus 2-Year Treasury spread (liquidity layer, daily)",
+    "BAMLH0A0HYM2": "ICE BofA US High Yield OAS (credit layer, daily; FRED restricts history to 3 years)",
+    "BAA10Y": "Moody's Baa minus 10-Year Treasury (credit-stress proxy, daily from 1986)",
+    "VIXCLS": "CBOE VIX close (volatility/contagion layer, daily)",
+    "NFCI": "Chicago Fed National Financial Conditions Index (weekly)",
+}
+
+C5_TRANSFORMS: dict[str, str] = {
+    "T10Y2Y": "diff",
+    "BAMLH0A0HYM2": "diff",
+    "BAA10Y": "diff",
+    "VIXCLS": "log_return",
+    "NFCI": "diff",
+    "UNRATE": "diff",
+    "PAYEMS": "log_return",
+    "ICSA": "log_return",
+    "WCOILBRENTEU": "log_return",
+}
+
+#: Stress direction per layer: +1 means "higher = stress", -1 means "lower = stress".
+C5_STRESS_DIRECTION: dict[str, int] = {
+    "T10Y2Y": -1,          # curve flattening / inversion
+    "BAMLH0A0HYM2": 1,     # spreads widen
+    "BAA10Y": 1,           # credit spread widens
+    "VIXCLS": 1,           # fear rises
+    "NFCI": 1,             # conditions tighten
+    "UNRATE": 1,
+    "PAYEMS": -1,
+    "ICSA": 1,
+    "WCOILBRENTEU": 1,
+}
+
+C5_TRAIN_ANCHORS: list[tuple[str, str]] = [
+    ("LTCM_RUSSIA_1998", "1998-08-17"),
+    ("DOTCOM_CRASH_2000", "2000-03-24"),
+]
+
+C5_COLD_ANCHORS: list[tuple[str, str]] = [
+    ("EURO_DEBT_US_DOWNGRADE_2011", "2011-08-05"),
+    ("HY_ENERGY_CRUNCH_2015", "2015-12-11"),
+    ("SVB_BANKING_STRESS_2023", "2023-03-10"),
+]
+
+
+def load_c5_series(force_refresh: bool = False) -> dict[str, pd.Series]:
+    """Download/parse the four C5 layers from FRED (official CSV endpoint)."""
+    download_all(force_refresh=force_refresh)  # core cache; harmless if present
+    series: dict[str, pd.Series] = {}
+    for series_id in C5_SERIES:
+        path = DATA_DIR / f"{series_id}.csv"
+        if force_refresh or not path.exists() or path.stat().st_size == 0:
+            print(f"[data_loader] downloading {series_id} ...")
+            path.write_bytes(_download(series_id))
+        series[series_id] = _parse(path, series_id)
+    return series
+
+
+def to_weekly_friday(series: pd.Series) -> pd.Series:
+    """Causal weekly close: last observation inside each Mon-Fri week."""
+    weekly = series.resample("W-FRI").last().dropna()
+    weekly.name = series.name
+    return weekly
+
+
+def to_month_end(series: pd.Series) -> pd.Series:
+    monthly = series.resample("ME").last().dropna()
+    monthly.name = series.name
+    return monthly
+
+
+def c5_weekly_layers() -> dict[str, pd.Series]:
+    """All eight layers on a Friday-close grid, with publication lags applied.
+
+    Monthly series (UNRATE, PAYEMS) are shifted +1 month before alignment, so a
+    Friday decision can only see the previous month's release. Weekly series are
+    shifted +1 week. Daily layers keep their Friday close.
+    """
+    core = load_all()
+    extra = load_c5_series()
+    layers: dict[str, pd.Series] = {}
+
+    for series_id in ("UNRATE", "PAYEMS"):
+        monthly = to_month_end(core[series_id])
+        shifted = pd.Series(monthly.to_numpy(), index=monthly.index + pd.DateOffset(months=1))
+        layers[series_id] = to_weekly_friday(shifted).ffill()
+
+    for series_id in ("ICSA", "WCOILBRENTEU"):
+        weekly = to_weekly_friday(core[series_id])
+        layers[series_id] = pd.Series(
+            weekly.to_numpy(), index=weekly.index + pd.Timedelta(weeks=1)
+        )
+
+    for series_id, series in extra.items():
+        if series_id == "NFCI":
+            weekly = to_weekly_friday(series)
+        else:
+            weekly = to_weekly_friday(series)
+        layers[series_id] = weekly
+
+    return layers
+
+
 def _download(series_id: str, retries: int = 4, timeout: int = 90) -> bytes:
     url = FRED_CSV_URL.format(series_id=series_id)
     last_error: Exception | None = None
