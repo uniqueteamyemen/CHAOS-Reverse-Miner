@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-26T22:34:23+00:00",
+  "generated_at_utc": "2026-11-27T17:19:02+00:00",
   "engine": "CHAOS-Reverse-Miner/composite_router-v3.0",
   "monthly_specialist": {
     "resonance_formula": "CROSS_SERIES_MACRO_GATE(window=fast, lead=long, huber_thr=4.0, cusum_thr=4.0, cusum_slack=0.5, resonance<=2mo)",
